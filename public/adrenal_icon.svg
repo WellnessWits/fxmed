@@ -1,0 +1,9 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Left adrenal gland - triangular shape -->
+<path d="M8 7C8 5.9 8.9 5 10 5L10 11C10 12.1 9.1 13 8 13C6.9 13 6 12.1 6 11L6 9C6 7.9 6.9 7 8 7Z" fill="#0F6839"/>
+<path d="M8 13C6.9 13 6 13.9 6 15L6 17C6 18.1 6.9 19 8 19C9.1 19 10 18.1 10 17L10 15C10 13.9 9.1 13 8 13Z" fill="#0F6839"/>
+
+<!-- Right adrenal gland - triangular shape -->
+<path d="M16 7C16 5.9 15.1 5 14 5L14 11C14 12.1 14.9 13 16 13C17.1 13 18 12.1 18 11L18 9C18 7.9 17.1 7 16 7Z" fill="#0F6839"/>
+<path d="M16 13C17.1 13 18 13.9 18 15L18 17C18 18.1 17.1 19 16 19C14.9 19 14 18.1 14 17L14 15C14 13.9 14.9 13 16 13Z" fill="#0F6839"/>
+</svg>

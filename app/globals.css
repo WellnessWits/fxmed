@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --green-deep: #1a3d2e;
+  --green-mid: #2d6a4f;
+  --green-light: #52b788;
+  --cream: #f8f3ea;
+  --cream-dark: #efe8d8;
+  --gold: #C9E265;
+  --gold-light: #D8F085;
+  --text-dark: #1c2b22;
+  --text-mid: #4a5e52;
+  --white: #ffffff;
+  --shadow: 0 8px 40px rgba(26,61,46,0.12);
+  --shadow-hover: 0 16px 60px rgba(26,61,46,0.22);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
