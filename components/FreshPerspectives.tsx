@@ -72,7 +72,7 @@ export default function FreshPerspectives() {
             </div>
 
             {/* CTA Button */}
-            <a href="#articles" className="font-dm-sans bg-gold text-green-deep px-8 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block">
+            <a href="/blog" className="font-dm-sans bg-gold text-green-deep px-8 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block">
               Read All Articles →
             </a>
           </div>

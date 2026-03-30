@@ -35,7 +35,7 @@ export default function Navigation() {
           <li><a href="#pricing" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Pricing</a></li>
           <li><a href="#gallery" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Gallery</a></li>
           <li><a href="#contact" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Contact</a></li>
-          <li><a href="#blog" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Blog</a></li>
+          <li><a href="/blog" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Blog</a></li>
         </ul>
         
         <a 
