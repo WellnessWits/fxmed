@@ -9,80 +9,99 @@ export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  const blogPosts = [
-    {
-      id: 'understanding-lab-results',
-      title: 'Understanding Your Lab Results',
-      excerpt: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
-      content: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
-      author: 'FXMed Team',
-      date: '2024-03-15',
-      readTime: '5 min read',
-      category: 'Health Education',
-      emoji: '🩺',
-      thumbnail: '/blog/lab-results.jpg'
-    },
-    {
-      id: 'preventive-care-strategies',
-      title: 'Preventive Care Strategies',
-      excerpt: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
-      content: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
-      author: 'FXMed Team',
-      date: '2024-03-10',
-      readTime: '8 min read',
-      category: 'Preventive Medicine',
-      emoji: '💊',
-      thumbnail: '/blog/preventive-care.jpg'
-    },
-    {
-      id: 'nutrition-mental-wellness',
-      title: 'Nutrition for Mental Wellness',
-      excerpt: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
-      content: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
-      author: 'FXMed Team',
-      date: '2024-03-05',
-      readTime: '6 min read',
-      category: 'Nutrition',
-      emoji: '🧠',
-      thumbnail: '/blog/nutrition-mental.jpg'
-    },
-    {
-      id: 'functional-medicine-basics',
-      title: 'Functional Medicine Basics',
-      excerpt: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
-      content: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
-      author: 'Dr. Kike Oduba',
-      date: '2024-02-28',
-      readTime: '10 min read',
-      category: 'Functional Medicine',
-      emoji: '🌿',
-      thumbnail: '/blog/functional-medicine.jpg'
-    },
-    {
-      id: 'mobile-healthcare-benefits',
-      title: 'Mobile Healthcare Benefits',
-      excerpt: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
-      content: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
-      author: 'FXMed Team',
-      date: '2024-02-20',
-      readTime: '7 min read',
-      category: 'Mobile Health',
-      emoji: '🚑',
-      thumbnail: '/blog/mobile-healthcare.jpg'
-    },
-    {
-      id: 'hormonal-balance-tips',
-      title: 'Achieving Hormonal Balance',
-      excerpt: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
-      content: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
-      author: 'Dr. Oladele Isaac',
-      date: '2024-02-15',
-      readTime: '9 min read',
-      category: 'Hormonal Health',
-      emoji: '⚖️',
-      thumbnail: '/blog/hormonal-balance.jpg'
+  // Category color mapping
+  const getCategoryColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      'Health Education': 'bg-blue-500 text-white',
+      'Preventive Medicine': 'bg-purple-500 text-white',
+      'Nutrition': 'bg-orange-500 text-white',
+      'Functional Medicine': 'bg-green-500 text-white',
+      'Mobile Health': 'bg-red-500 text-white',
+      'Hormonal Health': 'bg-pink-500 text-white'
     }
-  ]
+    return colors[category] || 'bg-gray-500 text-white'
+  }
+
+  // Get posts from admin panel or fallback to static posts
+  const getBlogPosts = () => {
+    if (typeof window !== 'undefined') {
+      const adminPosts = localStorage.getItem('blogPosts')
+      if (adminPosts) {
+        return JSON.parse(adminPosts)
+      }
+    }
+    // Fallback to static posts
+    return [
+      {
+        id: 'understanding-lab-results',
+        title: 'Understanding Your Lab Results',
+        excerpt: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
+        content: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
+        author: 'FXMed Team',
+        date: '2024-03-15',
+        readTime: '5 min read',
+        category: 'Health Education',
+        thumbnail: '/blog/lab-results.jpg'
+      },
+      {
+        id: 'preventive-care-strategies',
+        title: 'Preventive Care Strategies',
+        excerpt: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
+        content: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
+        author: 'FXMed Team',
+        date: '2024-03-10',
+        readTime: '8 min read',
+        category: 'Preventive Medicine',
+        thumbnail: '/blog/preventive-care.jpg'
+      },
+      {
+        id: 'nutrition-mental-wellness',
+        title: 'Nutrition for Mental Wellness',
+        excerpt: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
+        content: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
+        author: 'FXMed Team',
+        date: '2024-03-05',
+        readTime: '6 min read',
+        category: 'Nutrition',
+        thumbnail: '/blog/nutrition-mental.jpg'
+      },
+      {
+        id: 'functional-medicine-basics',
+        title: 'Functional Medicine Basics',
+        excerpt: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
+        content: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
+        author: 'Dr. Kike Oduba',
+        date: '2024-02-28',
+        readTime: '10 min read',
+        category: 'Functional Medicine',
+        thumbnail: '/blog/functional-medicine.jpg'
+      },
+      {
+        id: 'mobile-healthcare-benefits',
+        title: 'Mobile Healthcare Benefits',
+        excerpt: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
+        content: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
+        author: 'FXMed Team',
+        date: '2024-02-20',
+        readTime: '7 min read',
+        category: 'Mobile Health',
+        thumbnail: '/blog/mobile-healthcare.jpg'
+      },
+      {
+        id: 'hormonal-balance-tips',
+        title: 'Achieving Hormonal Balance',
+        excerpt: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
+        content: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
+        author: 'Dr. Oladele Isaac',
+        date: '2024-02-15',
+        readTime: '9 min read',
+        category: 'Hormonal Health',
+        thumbnail: '/blog/hormonal-balance.jpg'
+      }
+    ]
+  }
+
+  const blogPosts = getBlogPosts()
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -110,7 +129,7 @@ export default function BlogPage() {
       <Navigation />
       
       {/* Blog Header */}
-      <section className="py-[90px] px-[5%]">
+      <section className="pt-[180px] px-[5%]">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-dm-sans font-semibold tracking-[0.14em] uppercase mb-4">
             Fresh Perspectives
@@ -128,9 +147,9 @@ export default function BlogPage() {
       <section className="py-[40px] px-[5%]">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-[20px] p-6 shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Search Bar */}
-              <div>
+              <div className="lg:col-span-2">
                 <label htmlFor="search" className="block font-dm-sans font-semibold text-green-deep mb-2">
                   Search Articles
                 </label>
@@ -155,7 +174,7 @@ export default function BlogPage() {
               </div>
 
               {/* Category Filter */}
-              <div>
+              <div className="lg:col-span-1">
                 <label htmlFor="category" className="block font-dm-sans font-semibold text-green-deep mb-2">
                   Filter by Category
                 </label>
@@ -248,7 +267,7 @@ export default function BlogPage() {
                     />
                     {/* Category Badge */}
                     <div className="absolute top-4 left-4">
-                      <span className="bg-gold text-green-deep px-3 py-1 rounded-full text-xs font-semibold">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(post.category)}`}>
                         {post.category}
                       </span>
                     </div>

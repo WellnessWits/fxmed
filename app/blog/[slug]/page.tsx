@@ -1,7 +1,10 @@
+'use client'
+
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 const blogPosts = {
   'understanding-lab-results': {
@@ -23,7 +26,7 @@ Your blood work provides a snapshot of your overall health, including:
 ## Key Markers to Watch
 
 ### Inflammatory Markers
-- **CRP (C-Reactive Protein)**: Indicates inflammation in the body
+- **CRP (C-Reactive Protein)**: Indicates inflammation in body
 - **ESR (Erythrocyte Sedimentation Rate)**: Another inflammation marker
 
 ### Metabolic Health
@@ -42,7 +45,7 @@ Don't panic if you see values outside the "normal range." Consider:
 
 1. **Trends are more important than single values**
 2. **Optimal ranges differ from "normal" ranges**
-3. **Context matters (age, gender, symptoms)**
+3. **Context matters** (age, gender, symptoms)
 
 ## Next Steps
 
@@ -64,8 +67,7 @@ Remember, your lab results are tools for understanding your health, not verdicts
     author: 'FXMed Team',
     date: '2024-03-15',
     readTime: '5 min read',
-    category: 'Health Education',
-    emoji: '🩺'
+    category: 'Health Education'
   },
   'preventive-care-strategies': {
     title: 'Preventive Care Strategies',
@@ -202,8 +204,7 @@ Contact FXMed today to create your personalized preventive health plan.
     author: 'FXMed Team',
     date: '2024-03-10',
     readTime: '8 min read',
-    category: 'Preventive Medicine',
-    emoji: '💊'
+    category: 'Preventive Medicine'
   },
   'nutrition-mental-wellness': {
     title: 'Nutrition for Mental Wellness',
@@ -262,8 +263,8 @@ Your gut and brain are in constant communication through:
 **Rich Sources:**
 - Dark chocolate
 - Nuts and seeds
-- Leafy greens
 - Whole grains
+- Leafy greens
 
 ### 4. Vitamin D
 
@@ -292,6 +293,14 @@ Your gut and brain are in constant communication through:
 - Dairy products
 - Legumes
 - Whole grains
+
+### 6. Probiotics and Prebiotics
+
+**Gut-Brain Axis:**
+- Fermented foods (yogurt, kefir)
+- High-fiber foods
+- Prebiotic foods (garlic, onions)
+- Diverse plant foods
 
 ## Foods to Limit for Mental Health
 
@@ -356,8 +365,8 @@ Your gut and brain are in constant communication through:
 ### Snack Options
 - Nuts and seeds
 - Fresh fruit with nut butter
-- Vegetable sticks with hummus
 - Dark chocolate squares
+- Vegetable sticks with hummus
 
 ## Success Stories
 
@@ -370,7 +379,7 @@ Our patients have experienced:
 
 ## Getting Started
 
-1. **Schedule a nutritional assessment**
+1. **Schedule a nutritional Assessment**
 2. **Complete dietary analysis**
 3. **Receive personalized plan**
 4. **Implement with support**
@@ -402,127 +411,185 @@ Your mental health is worth investing in. Let FXMed help you create a nutritiona
   }
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const post = blogPosts[params.slug as keyof typeof blogPosts]
+export default function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const [post, setPost] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [slug, setSlug] = useState<string>('')
 
-  if (!post) {
-    notFound()
+  // Category color mapping
+  const getCategoryColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      'Health Education': 'bg-blue-500 text-white',
+      'Preventive Medicine': 'bg-purple-500 text-white',
+      'Nutrition': 'bg-orange-500 text-white',
+      'Functional Medicine': 'bg-green-500 text-white',
+      'Mobile Health': 'bg-red-500 text-white',
+      'Hormonal Health': 'bg-pink-500 text-white'
+    }
+    return colors[category] || 'bg-gray-500 text-white'
   }
+
+  useEffect(() => {
+    const loadPost = async () => {
+      try {
+        const resolvedParams = await params
+        const resolvedSlug = resolvedParams.slug
+        setSlug(resolvedSlug)
+        
+        console.log('Resolved slug:', resolvedSlug)
+        
+        const postData = blogPosts[resolvedSlug as keyof typeof blogPosts]
+        
+        if (!postData) {
+          console.log('Post not found for slug:', resolvedSlug)
+          notFound()
+        }
+        
+        setPost(postData)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error loading post:', error)
+        setLoading(false)
+      }
+    }
+    
+    loadPost()
+  }, [params])
 
   return (
     <main className="min-h-screen bg-[#FCFFF0]">
       <Navigation />
       
       {/* Article Header */}
-      <article className="py-[90px] px-[5%]">
+      <article className="pt-[180px] px-[5%]">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="mb-8">
-            <Link href="/blog" className="font-dm-sans text-green-mid text-[0.95rem] no-underline hover:text-green-deep transition-colors">
-              ← Back to Articles
-            </Link>
-          </nav>
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="text-4xl mb-4">Loading...</div>
+              <p className="font-dm-sans text-text-mid text-[1.1rem]">
+                Loading article...
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Breadcrumb */}
+              <nav className="mb-8 relative z-10">
+                <Link 
+                  href="/blog" 
+                  className="font-dm-sans text-green-mid text-[0.95rem] no-underline hover:text-green-deep transition-all hover:underline cursor-pointer inline-block px-2 py-1 rounded-lg hover:bg-green-deep/10"
+                  style={{ 
+                    cursor: 'pointer',
+                    pointerEvents: 'auto',
+                    userSelect: 'none',
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
+                >
+                  ← Back to Articles
+                </Link>
+              </nav>
 
-          {/* Article Meta */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="text-4xl mr-4">{post.emoji}</div>
-              <div>
-                <span className="inline-block text-green-mid bg-green-mid/10 px-3 py-1 rounded-[20px] text-[0.8rem] font-dm-sans font-semibold mb-2">
-                  {post.category}
-                </span>
-                <div className="text-text-mid text-[0.9rem]">
-                  {post.date} • {post.readTime}
+              {/* Article Meta */}
+              <div className="mb-8">
+                <div className="flex items-center mb-4">
+                  <div className="text-4xl mr-4">{post.emoji}</div>
+                  <div>
+                    <span className={`inline-block px-3 py-1 rounded-[20px] text-[0.8rem] font-dm-sans font-semibold mb-2 ${getCategoryColor(post.category)}`}>
+                      {post.category}
+                    </span>
+                    <div className="text-text-mid text-[0.9rem]">
+                      {post.date} • {post.readTime}
+                    </div>
+                  </div>
+                </div>
+                
+                <h1 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,5vw,3rem)] leading-[1.2] mb-4">
+                  {post.title}
+                </h1>
+                
+                <div className="flex items-center justify-between text-text-mid">
+                  <span className="font-medium">By {post.author}</span>
+                  <div className="flex gap-4">
+                    <button className="font-dm-sans text-green-mid hover:text-green-deep transition-colors">
+                      Share →
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <h1 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,5vw,3rem)] leading-[1.2] mb-4">
-              {post.title}
-            </h1>
-            
-            <div className="flex items-center justify-between text-text-mid">
-              <span className="font-medium">By {post.author}</span>
-              <div className="flex gap-4">
-                <button className="font-dm-sans text-green-mid hover:text-green-deep transition-colors">
-                  Share →
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Article Content */}
-          <div className="bg-white rounded-[20px] p-8 shadow-lg">
-            <div className="prose prose-lg max-w-none">
-              {post.content.split('\n').map((paragraph, index) => {
-                if (paragraph.startsWith('# ')) {
-                  return <h1 key={index} className="font-dm-sans font-bold text-green-deep text-[2rem] mb-4">{paragraph.slice(2)}</h1>
-                } else if (paragraph.startsWith('## ')) {
-                  return <h2 key={index} className="font-dm-sans font-bold text-green-deep text-[1.5rem] mb-3 mt-6">{paragraph.slice(3)}</h2>
-                } else if (paragraph.startsWith('### ')) {
-                  return <h3 key={index} className="font-dm-sans font-bold text-green-deep text-[1.2rem] mb-2 mt-4">{paragraph.slice(4)}</h3>
-                } else if (paragraph.startsWith('- ')) {
-                  return <li key={index} className="font-dm-sans text-text-mid mb-1">{paragraph.slice(2)}</li>
-                } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                  return <p key={index} className="font-dm-sans font-semibold text-green-deep mb-4">{paragraph.slice(2, -2)}</p>
-                } else if (paragraph.trim()) {
-                  return <p key={index} className="font-dm-sans text-text-mid leading-[1.7] mb-4">{paragraph}</p>
-                }
-                return null
-              })}
-            </div>
-          </div>
-
-          {/* Article Footer */}
-          <div className="mt-12 pt-8 border-t border-green-deep/20">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div>
-                <h3 className="font-dm-sans font-bold text-green-deep mb-2">About the Author</h3>
-                <p className="font-dm-sans text-text-mid">{post.author}</p>
+              {/* Article Content */}
+              <div className="bg-white rounded-[20px] p-8 shadow-lg">
+                <div className="prose prose-lg max-w-none">
+                  {post.content.split('\n').map((paragraph, index) => {
+                    if (paragraph.startsWith('# ')) {
+                      return <h1 key={index} className="font-dm-sans font-bold text-green-deep text-[2rem] mb-4">{paragraph.slice(2)}</h1>
+                    } else if (paragraph.startsWith('## ')) {
+                      return <h2 key={index} className="font-dm-sans font-bold text-green-deep text-[1.5rem] mb-3 mt-6">{paragraph.slice(3)}</h2>
+                    } else if (paragraph.startsWith('### ')) {
+                      return <h3 key={index} className="font-dm-sans font-bold text-green-deep text-[1.2rem] mb-2 mt-4">{paragraph.slice(4)}</h3>
+                    } else if (paragraph.startsWith('- ')) {
+                      return <li key={index} className="font-dm-sans text-text-mid mb-1">{paragraph.slice(2)}</li>
+                    } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+                      return <p key={index} className="font-dm-sans font-semibold text-green-deep mb-4">{paragraph.slice(2, -2)}</p>
+                    } else if (paragraph.trim()) {
+                      return <p key={index} className="font-dm-sans text-text-mid leading-[1.7] mb-4">{paragraph}</p>
+                    }
+                    return null
+                  })}
+                </div>
               </div>
-              
-              <div className="flex gap-4">
-                <button className="font-dm-sans bg-gold text-green-deep px-6 py-3 rounded-[50px] font-semibold text-[0.95rem] transition-all hover:bg-gold-light">
-                  Share Article
-                </button>
-                <button className="font-dm-sans bg-transparent text-green-deep px-6 py-3 rounded-[50px] font-semibold text-[0.95rem] border-2 border-green-deep transition-all hover:bg-green-deep hover:text-white">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Related Articles */}
-          <div className="mt-16">
-            <h2 className="font-dm-sans font-bold text-green-deep text-[2rem] mb-8">Related Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.values(blogPosts)
-                .filter(p => p.title !== post.title)
-                .slice(0, 2)
-                .map((relatedPost) => (
-                  <Link 
-                    key={relatedPost.title}
-                    href={`/blog/${Object.keys(blogPosts).find(key => blogPosts[key as keyof typeof blogPosts].title === relatedPost.title)}`}
-                    className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow no-underline"
-                  >
-                    <div className="flex items-start mb-3">
-                      <div className="text-2xl mr-3">{relatedPost.emoji}</div>
-                      <div>
-                        <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
-                          {relatedPost.title}
-                        </h3>
-                        <p className="font-dm-sans text-text-mid text-[0.9rem] mb-2">
-                          {relatedPost.content.slice(0, 100)}...
-                        </p>
-                        <div className="text-green-mid text-[0.85rem] font-medium">
-                          {relatedPost.readTime}
+              {/* Article Footer */}
+              <div className="mt-12 pt-8 border-t border-green-deep/20">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div>
+                    <h3 className="font-dm-sans font-bold text-green-deep mb-2">About the Author</h3>
+                    <p className="font-dm-sans text-text-mid">{post.author}</p>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <button className="font-dm-sans bg-gold text-green-deep px-6 py-3 rounded-[50px] font-semibold text-[0.95rem] transition-all hover:bg-gold-light">
+                      Share Article
+                    </button>
+                    <button className="font-dm-sans bg-transparent text-green-deep px-6 py-3 rounded-[50px] font-semibold text-[0.95rem] border-2 border-green-deep transition-all hover:bg-green-deep hover:text-white">
+                      Subscribe
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Related Articles */}
+              <div className="mt-16">
+                <h2 className="font-dm-sans font-bold text-green-deep text-[2rem] mb-8">Related Articles</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.values(blogPosts)
+                    .filter(p => p.title !== post.title)
+                    .slice(0, 2)
+                    .map((relatedPost) => (
+                      <Link 
+                        key={relatedPost.title}
+                        href={`/blog/${Object.keys(blogPosts).find(key => blogPosts[key as keyof typeof blogPosts].title === relatedPost.title)}`}
+                        className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow no-underline"
+                      >
+                        <div className="flex items-start mb-3">
+                          <div className="text-2xl mr-3">{relatedPost.emoji}</div>
+                          <div>
+                            <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
+                              {relatedPost.title}
+                            </h3>
+                            <p className="font-dm-sans text-text-mid text-[0.9rem] mb-2">
+                              {relatedPost.content.slice(0, 100)}...
+                            </p>
+                            <div className="text-green-mid text-[0.85rem] font-medium">
+                              {relatedPost.readTime}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-            </div>
-          </div>
+                      </Link>
+                    ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </article>
 

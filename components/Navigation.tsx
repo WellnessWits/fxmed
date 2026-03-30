@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,6 +14,8 @@ export default function Navigation() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const isBlogPage = pathname?.startsWith('/blog')
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
@@ -29,13 +33,13 @@ export default function Navigation() {
         </a>
         
         <ul className="flex gap-8 list-none m-0 font-dm-sans">
-          <li><a href="#about" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">About</a></li>
-          <li><a href="#programs" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Programs</a></li>
-          <li><a href="#services" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Services</a></li>
-          <li><a href="#pricing" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Pricing</a></li>
-          <li><a href="#gallery" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Gallery</a></li>
-          <li><a href="#contact" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Contact</a></li>
-          <li><a href="/blog" className="text-cream/85 text-[0.9rem] font-medium no-underline transition-colors hover:text-gold">Blog</a></li>
+          <li><a href="#about" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>About</a></li>
+          <li><a href="#programs" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Programs</a></li>
+          <li><a href="#services" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Services</a></li>
+          <li><a href="#pricing" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Pricing</a></li>
+          <li><a href="#gallery" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Gallery</a></li>
+          <li><a href="#contact" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Contact</a></li>
+          <li><a href="/blog" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Blog</a></li>
         </ul>
         
         <a 
