@@ -19,7 +19,8 @@ export default function BlogPage() {
       date: '2024-03-15',
       readTime: '5 min read',
       category: 'Health Education',
-      emoji: '🩺'
+      emoji: '🩺',
+      thumbnail: '/blog/lab-results.jpg'
     },
     {
       id: 'preventive-care-strategies',
@@ -30,7 +31,8 @@ export default function BlogPage() {
       date: '2024-03-10',
       readTime: '8 min read',
       category: 'Preventive Medicine',
-      emoji: '💊'
+      emoji: '💊',
+      thumbnail: '/blog/preventive-care.jpg'
     },
     {
       id: 'nutrition-mental-wellness',
@@ -41,7 +43,8 @@ export default function BlogPage() {
       date: '2024-03-05',
       readTime: '6 min read',
       category: 'Nutrition',
-      emoji: '🧠'
+      emoji: '🧠',
+      thumbnail: '/blog/nutrition-mental.jpg'
     },
     {
       id: 'functional-medicine-basics',
@@ -52,7 +55,8 @@ export default function BlogPage() {
       date: '2024-02-28',
       readTime: '10 min read',
       category: 'Functional Medicine',
-      emoji: '🌿'
+      emoji: '🌿',
+      thumbnail: '/blog/functional-medicine.jpg'
     },
     {
       id: 'mobile-healthcare-benefits',
@@ -63,7 +67,8 @@ export default function BlogPage() {
       date: '2024-02-20',
       readTime: '7 min read',
       category: 'Mobile Health',
-      emoji: '🚑'
+      emoji: '🚑',
+      thumbnail: '/blog/mobile-healthcare.jpg'
     },
     {
       id: 'hormonal-balance-tips',
@@ -74,13 +79,15 @@ export default function BlogPage() {
       date: '2024-02-15',
       readTime: '9 min read',
       category: 'Hormonal Health',
-      emoji: '⚖️'
+      emoji: '⚖️',
+      thumbnail: '/blog/hormonal-balance.jpg'
     }
   ]
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = ['all', ...new Set(blogPosts.map(post => post.category))]
+    const uniqueCategories = Array.from(new Set(blogPosts.map(post => post.category)))
+    const cats = ['all', ...uniqueCategories]
     return cats
   }, [blogPosts])
 
@@ -219,27 +226,46 @@ export default function BlogPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => (
                 <article key={post.id} className="bg-white rounded-[20px] overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  {/* Post Header */}
+                  {/* Thumbnail Image */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={post.thumbnail} 
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        // Fallback to emoji if image fails to load
+                        const target = e.currentTarget
+                        const parent = target.parentElement
+                        if (parent) {
+                          target.style.display = 'none'
+                          parent.innerHTML = `
+                            <div class="w-full h-full bg-gradient-to-br from-green-deep/10 to-green-mid/10 flex items-center justify-center">
+                              <div class="text-6xl">${post.emoji}</div>
+                            </div>
+                          `
+                        }
+                      }}
+                    />
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-gold text-green-deep px-3 py-1 rounded-full text-xs font-semibold">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Post Content */}
                   <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="text-3xl mr-3">{post.emoji}</div>
-                      <div>
-                        <span className="inline-block text-green-mid text-[0.8rem] font-medium mb-1">
-                          {post.category}
-                        </span>
-                        <div className="text-text-mid text-[0.85rem]">
-                          {post.date} • {post.readTime}
-                        </div>
+                    <div className="flex items-center mb-3">
+                      <div className="text-2xl mr-2">{post.emoji}</div>
+                      <div className="text-text-mid text-[0.85rem]">
+                        {post.date} • {post.readTime}
                       </div>
                     </div>
                     
                     <h2 className="font-dm-sans font-bold text-green-deep text-[1.3rem] leading-[1.3] mb-3">
                       {post.title}
                     </h2>
-                    
-                    <p className="font-dm-sans text-text-mid text-[1rem] leading-[1.6] mb-4">
-                      {post.excerpt}
-                    </p>
                     
                     <div className="flex items-center justify-between">
                       <span className="text-text-mid text-[0.9rem] font-medium">
