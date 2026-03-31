@@ -1,0 +1,927 @@
+'use client'
+
+import { useState, useEffect, useMemo } from 'react'
+
+type Stage = "Outreach" | "Enrollment" | "Onboarding" | "Follow-Up" | "Active"
+type NavItem = "overview" | "pipeline" | "coordinator" | "calendar" | "documents" | "reporting" | "ai-agent"
+type Risk = "High" | "Medium" | "Low"
+
+type Patient = {
+  id: string
+  name: string
+  age: number
+  program: string
+  risk: Risk
+  stage: Stage
+  source: string
+  owner: string
+  phone: string
+  email: string
+  lastTouch: string
+  nextStep: string
+  nextDate: string
+  progress: number
+  tags: string[]
+  preferred: string
+  appointment: string
+  consentStatus: string
+  documentCount: number
+  reminderStatus: string
+}
+
+type Task = {
+  id: number
+  title: string
+  priority: "High" | "Medium" | "Low"
+  due: string
+  owner: string
+}
+
+type Appointment = {
+  id: number
+  patientId: string
+  title: string
+  date: string
+  time: string
+  mode: string
+  owner: string
+}
+
+type DocumentItem = {
+  name: string
+  category: string
+  status: string
+}
+
+type Reminder = {
+  id: number
+  type: string
+  patientId: string
+  channel: string
+  status: string
+  sendAt: string
+}
+
+type AgentMessage = {
+  role: "assistant" | "user"
+  text: string
+}
+
+type AgentSuggestion = {
+  title: string
+  detail: string
+  action: string
+}
+
+interface CrmDashboardProps {
+  patients: Patient[]
+  setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
+  showLeadModal: boolean
+  setShowLeadModal: (show: boolean) => void
+  leadForm: {
+    name: string
+    phone: string
+    email: string
+    source: string
+    program: string
+    owner: string
+    risk: Risk
+    consent: boolean
+  }
+  setLeadForm: (form: any) => void
+  createLead: () => Promise<void>
+}
+
+const patientsSeed: Patient[] = [
+  {
+    id: "FX001",
+    name: "Amara Okafor",
+    age: 52,
+    program: "Cardiometabolic Care",
+    risk: "High",
+    stage: "Outreach",
+    source: "Physician Referral",
+    owner: "Tola",
+    phone: "(713) 555-0189",
+    email: "amara@sample.com",
+    lastTouch: "Today",
+    nextStep: "Call to discuss enrollment",
+    nextDate: "Mar 24",
+    progress: 15,
+    tags: ["Hypertension", "Prediabetes"],
+    preferred: "Phone",
+    appointment: "Mar 24 • 10:30 AM",
+    consentStatus: "Pending",
+    documentCount: 2,
+    reminderStatus: "Urgent",
+  },
+  {
+    id: "FX002",
+    name: "Chinedu Adeyemi",
+    age: 46,
+    program: "Executive Concierge",
+    risk: "Medium",
+    stage: "Enrollment",
+    source: "Website Lead",
+    owner: "Maya",
+    phone: "(832) 555-0127",
+    email: "chinedu@sample.com",
+    lastTouch: "Yesterday",
+    nextStep: "Send consent forms",
+    nextDate: "Mar 25",
+    progress: 35,
+    tags: ["Busy executive", "Needs labs"],
+    preferred: "Email",
+    appointment: "Mar 25 • 1:00 PM",
+    consentStatus: "Sent",
+    documentCount: 4,
+    reminderStatus: "Scheduled",
+  },
+  {
+    id: "FX003",
+    name: "Nneka Johnson",
+    age: 39,
+    program: "Weight & Metabolic Reset",
+    risk: "Low",
+    stage: "Onboarding",
+    source: "Community Event",
+    owner: "Tola",
+    phone: "(281) 555-0110",
+    email: "nneka@sample.com",
+    lastTouch: "2 days ago",
+    nextStep: "Complete intake questionnaire",
+    nextDate: "Mar 26",
+    progress: 60,
+    tags: ["Postpartum", "Nutrition"],
+    preferred: "Text",
+    appointment: "Mar 26 • 11:15 AM",
+    consentStatus: "Signed",
+    documentCount: 6,
+    reminderStatus: "Scheduled",
+  },
+  {
+    id: "FX004",
+    name: "Kemi Brown",
+    age: 58,
+    program: "Cardiometabolic Care",
+    risk: "High",
+    stage: "Follow-Up",
+    source: "Hospital Partner",
+    owner: "Ade",
+    phone: "(346) 555-0141",
+    email: "kemi@sample.com",
+    lastTouch: "Today",
+    nextStep: "Review BP logs and refill needs",
+    nextDate: "Mar 24",
+    progress: 85,
+    tags: ["Diabetes", "RPM"],
+    preferred: "Phone",
+    appointment: "Mar 24 • 3:45 PM",
+    consentStatus: "Signed",
+    documentCount: 8,
+    reminderStatus: "Sent",
+  },
+  {
+    id: "FX005",
+    name: "Tunde Ellis",
+    age: 50,
+    program: "Executive Concierge",
+    risk: "Medium",
+    stage: "Active",
+    source: "Employer Partnership",
+    owner: "Maya",
+    phone: "(713) 555-0172",
+    email: "tunde@sample.com",
+    lastTouch: "3 days ago",
+    nextStep: "Schedule quarterly check-in",
+    nextDate: "Mar 29",
+    progress: 100,
+    tags: ["Travel-heavy", "Preventive"],
+    preferred: "Email",
+    appointment: "Mar 29 • 9:00 AM",
+    consentStatus: "Signed",
+    documentCount: 10,
+    reminderStatus: "Scheduled",
+  },
+  {
+    id: "FX006",
+    name: "Folake Mensah",
+    age: 61,
+    program: "Weight & Metabolic Reset",
+    risk: "High",
+    stage: "Enrollment",
+    source: "Past Patient Referral",
+    owner: "Ade",
+    phone: "(832) 555-0193",
+    email: "folake@sample.com",
+    lastTouch: "Yesterday",
+    nextStep: "Verify insurance and payment option",
+    nextDate: "Mar 24",
+    progress: 40,
+    tags: ["Obesity", "Sleep issues"],
+    preferred: "Phone",
+    appointment: "Mar 24 • 4:30 PM",
+    consentStatus: "Sent",
+    documentCount: 3,
+    reminderStatus: "Urgent",
+  },
+]
+
+const tasksSeed: Task[] = [
+  { id: 1, title: "Call 6 high-risk outreach leads", priority: "High", due: "Today", owner: "Tola" },
+  { id: 2, title: "Review incomplete onboarding forms", priority: "Medium", due: "Today", owner: "Ade" },
+  { id: 3, title: "Send welcome packet to new enrollees", priority: "Medium", due: "Tomorrow", owner: "Maya" },
+  { id: 4, title: "Prepare follow-up list for RPM patients", priority: "High", due: "Tomorrow", owner: "Ade" },
+]
+
+const appointmentsSeed: Appointment[] = [
+  { id: 1, patientId: "FX001", title: "Enrollment Call", date: "Mar 24", time: "10:30 AM", mode: "Phone", owner: "Tola" },
+  { id: 2, patientId: "FX004", title: "Follow-Up Review", date: "Mar 24", time: "3:45 PM", mode: "Virtual", owner: "Ade" },
+  { id: 3, patientId: "FX006", title: "Benefits Verification", date: "Mar 24", time: "4:30 PM", mode: "Phone", owner: "Ade" },
+  { id: 4, patientId: "FX002", title: "Consent Walkthrough", date: "Mar 25", time: "1:00 PM", mode: "Virtual", owner: "Maya" },
+  { id: 5, patientId: "FX003", title: "Onboarding Session", date: "Mar 26", time: "11:15 AM", mode: "In Person", owner: "Tola" },
+  { id: 6, patientId: "FX005", title: "Quarterly Concierge Check-In", date: "Mar 29", time: "9:00 AM", mode: "Virtual", owner: "Maya" },
+]
+
+const documentsSeed: Record<string, DocumentItem[]> = {
+  FX001: [
+    { name: "Referral Summary.pdf", category: "Referral", status: "Received" },
+    { name: "Consent Packet.pdf", category: "Consent", status: "Pending Signature" },
+  ],
+  FX002: [
+    { name: "Membership Agreement.pdf", category: "Consent", status: "Sent" },
+    { name: "Insurance Intake.pdf", category: "Enrollment", status: "Received" },
+    { name: "Executive Labs Order.pdf", category: "Clinical", status: "Ready" },
+  ],
+  FX003: [
+    { name: "Onboarding Questionnaire.pdf", category: "Onboarding", status: "Completed" },
+    { name: "Nutrition Starter Guide.pdf", category: "Education", status: "Shared" },
+  ],
+  FX004: [
+    { name: "RPM Device Consent.pdf", category: "Consent", status: "Signed" },
+    { name: "BP Log March.pdf", category: "Monitoring", status: "Updated" },
+  ],
+  FX005: [{ name: "Quarterly Review.pdf", category: "Follow-Up", status: "Ready" }],
+  FX006: [{ name: "Benefits Verification.pdf", category: "Enrollment", status: "Pending" }],
+}
+
+const remindersSeed: Reminder[] = [
+  { id: 1, type: "Consent Reminder", patientId: "FX001", channel: "SMS", status: "Queued", sendAt: "Today • 5:00 PM" },
+  { id: 2, type: "Appointment Reminder", patientId: "FX004", channel: "Call", status: "Sent", sendAt: "Today • 2:00 PM" },
+  { id: 3, type: "Lab Completion Reminder", patientId: "FX002", channel: "Email", status: "Scheduled", sendAt: "Tomorrow • 8:00 AM" },
+  { id: 4, type: "Follow-up Check-in", patientId: "FX006", channel: "SMS", status: "Queued", sendAt: "Tomorrow • 9:30 AM" },
+]
+
+export default function CrmDashboard({
+  patients,
+  setPatients,
+  showLeadModal,
+  setShowLeadModal,
+  leadForm,
+  setLeadForm,
+  createLead
+}: CrmDashboardProps) {
+  const [selectedId, setSelectedId] = useState<string>(patients[0]?.id || "")
+  const [search, setSearch] = useState("")
+  const [stageFilter, setStageFilter] = useState<string>("All")
+  const [riskFilter, setRiskFilter] = useState<string>("All")
+  const [activeSection, setActiveSection] = useState<NavItem>("overview")
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [showPatientModal, setShowPatientModal] = useState(false)
+  const [showAgentPanel, setShowAgentPanel] = useState(true)
+  const [agentMessages, setAgentMessages] = useState<AgentMessage[]>([
+    { role: "assistant", text: "Welcome to FXMED CRM! I can help you manage patient outreach, track consent status, and optimize your enrollment pipeline. What would you like to focus on today?" }
+  ])
+
+  const navItems = [
+    { id: "overview", label: "Overview", icon: "📊" },
+    { id: "pipeline", label: "Pipeline", icon: "📈" },
+    { id: "coordinator", label: "Coordinator", icon: "👥" },
+    { id: "calendar", label: "Calendar", icon: "📅" },
+    { id: "documents", label: "Documents", icon: "📄" },
+    { id: "reporting", label: "Reporting", icon: "📋" },
+    { id: "ai-agent", label: "AI Agent", icon: "🤖" },
+  ]
+
+  const pipelineStages: Stage[] = ["Outreach", "Enrollment", "Onboarding", "Follow-Up", "Active"]
+
+  // Move patient stage via API
+  const movePatientStage = async (patient: Patient, direction: number) => {
+    const currentIndex = pipelineStages.indexOf(patient.stage)
+    const newIndex = Math.max(0, Math.min(pipelineStages.length - 1, currentIndex + direction))
+    const newStage = pipelineStages[newIndex]
+
+    try {
+      const response = await fetch('/api/crm', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: patient.id,
+          stage: newStage,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API error:', errorData)
+        throw new Error(errorData.error || 'Failed to update patient stage')
+      }
+
+      const { patient: updatedPatient } = await response.json()
+      
+      // Update local state with the updated patient
+      setPatients((prev) => prev.map((p) => p.id === patient.id ? updatedPatient : p))
+    } catch (error) {
+      console.error('Error updating patient stage:', error)
+      // Fallback to local state update if API fails
+      setPatients((prev) => prev.map((p) => 
+        p.id === patient.id ? { ...p, stage: newStage } : p
+      ))
+    }
+  }
+
+  // Filter patients based on search and filters
+  const filteredPatients = useMemo(() => {
+    return patients.filter((patient) => {
+      const matchesSearch = patient.name.toLowerCase().includes(search.toLowerCase()) ||
+                          patient.program.toLowerCase().includes(search.toLowerCase()) ||
+                          patient.owner.toLowerCase().includes(search.toLowerCase())
+      const matchesStage = stageFilter === "All" || patient.stage === stageFilter
+      const matchesRisk = riskFilter === "All" || patient.risk === riskFilter
+
+      return matchesSearch && matchesStage && matchesRisk
+    })
+  }, [patients, search, stageFilter, riskFilter])
+
+  const selectedPatient = filteredPatients.find((p) => p.id === selectedId) ?? filteredPatients[0] ?? patients[0]
+  const selectedDocuments = documentsSeed[selectedPatient?.id] ?? []
+  const selectedAppointments = appointmentsSeed.filter((appt) => appt.patientId === selectedPatient?.id)
+  const coordinatorPatients = patients.filter((p) => p.owner === selectedPatient?.owner)
+
+  const dashboard = useMemo(() => {
+    const total = patients.length
+    const dueToday = patients.filter((p) => p.nextDate === "Mar 24").length
+    const signedConsents = patients.filter((p) => p.consentStatus === "Signed").length
+    const highRisk = patients.filter((p) => p.risk === "High").length
+    const active = patients.filter((p) => p.stage === "Active").length
+    const enrollment = patients.filter((p) => p.stage === "Enrollment").length
+    const onboarding = patients.filter((p) => p.stage === "Onboarding").length
+    return {
+      total,
+      dueToday,
+      highRisk,
+      signedConsents,
+      active,
+      enrollment,
+      onboarding,
+      consentRate: Math.round((signedConsents / total) * 100),
+      conversionRate: Math.round((active / total) * 100),
+      outreachBacklog: patients.filter((p) => p.stage === "Outreach").length,
+    }
+  }, [patients])
+
+  const coordinatorStats = useMemo(() => {
+    const owners = Array.from(new Set(patients.map(p => p.owner)))
+    return owners.map(owner => {
+      const ownerPatients = patients.filter(p => p.owner === owner)
+      return {
+        owner,
+        total: ownerPatients.length,
+        highRisk: ownerPatients.filter(p => p.risk === "High").length,
+        dueToday: ownerPatients.filter(p => p.nextDate === "Mar 24").length,
+      }
+    })
+  }, [patients])
+
+  // Helper functions
+  const getStageColor = (stage: Stage) => {
+    switch (stage) {
+      case "Outreach": return "bg-yellow-100 text-yellow-800"
+      case "Enrollment": return "bg-blue-100 text-blue-800"
+      case "Onboarding": return "bg-purple-100 text-purple-800"
+      case "Follow-Up": return "bg-green-100 text-green-800"
+      case "Active": return "bg-emerald-100 text-emerald-800"
+      default: return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getRiskColor = (risk: Risk) => {
+    switch (risk) {
+      case "High": return "text-red-600"
+      case "Medium": return "text-yellow-600"
+      case "Low": return "text-green-600"
+      default: return "text-gray-600"
+    }
+  }
+
+  // CRM Action Handlers
+  const runAgentAction = (prompt: string) => {
+    const lower = prompt.toLowerCase()
+    let response = `${selectedPatient?.name} is currently in ${selectedPatient?.stage} with ${selectedPatient?.risk?.toLowerCase()} risk and next action: ${selectedPatient?.nextStep}.`
+
+    if (lower.includes("brief") || lower.includes("summarize")) {
+      response = `${selectedPatient?.name} summary: ${selectedPatient?.program}, ${selectedPatient?.risk?.toLowerCase()} risk, owned by ${selectedPatient?.owner}. Main blocker: ${selectedPatient?.nextStep}. Consent status is ${selectedPatient?.consentStatus?.toLowerCase()} and next touchpoint is ${selectedPatient?.appointment}.`
+    } else if (lower.includes("outreach") || lower.includes("draft")) {
+      response = `Draft message: Hi ${selectedPatient?.name?.split(" ")[0]}, this is ${selectedPatient?.owner} from FXMED. I'm reaching out to help with your next step: ${selectedPatient?.nextStep}. Please reply with a good time today so we can keep your care plan moving.`
+    } else if (lower.includes("consent")) {
+      response = `Recommended consent recovery workflow: send reminder via ${selectedPatient?.preferred?.toLowerCase()}, follow with a same-day coordinator call, and escalate if consent remains ${selectedPatient?.consentStatus?.toLowerCase()} after 24 hours.`
+    } else if (lower.includes("calendar") || lower.includes("schedule")) {
+      response = `Best schedule recommendation: keep the next appointment on ${selectedPatient?.appointment}, then queue a follow-up reminder 24 hours before and a coordinator task for same-day confirmation.`
+    } else if (lower.includes("document") || lower.includes("audit")) {
+      response = `${selectedPatient?.name} currently has ${selectedPatient?.documentCount} documents on file. Priority review items should focus on consent status (${selectedPatient?.consentStatus}) and any onboarding or clinical packets still missing.`
+    } else if (lower.includes("kpi") || lower.includes("metric") || lower.includes("report")) {
+      response = `Current KPI view: consent completion is ${dashboard.consentRate}%, conversion is ${dashboard.conversionRate}%, and outreach backlog is ${dashboard.outreachBacklog}. Biggest improvement opportunity is moving enrollment patients into onboarding faster.`
+    }
+
+    setAgentMessages((prev) => [...prev, { role: "user", text: prompt }, { role: "assistant", text: response }])
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* CRM Navigation */}
+      <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveSection(item.id as NavItem)}
+            className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors whitespace-nowrap ${
+              activeSection === item.id
+                ? 'bg-green-deep text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {item.icon} {item.label}
+          </button>
+        ))}
+      </div>
+
+      {activeSection === "overview" && (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* KPI Cards */}
+          <div className="lg:col-span-2 grid gap-4 md:grid-cols-2">
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Total Patients</h3>
+                <span className="text-2xl font-bold text-green-deep">{dashboard.total}</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Active</span>
+                  <span className="font-medium text-green-600">{dashboard.active}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Enrolling</span>
+                  <span className="font-medium text-blue-600">{dashboard.enrollment}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Onboarding</span>
+                  <span className="font-medium text-purple-600">{dashboard.onboarding}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Consent Rate</h3>
+                <span className="text-2xl font-bold text-green-deep">{dashboard.consentRate}%</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Signed</span>
+                  <span className="font-medium text-green-600">{dashboard.signedConsents}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Pending</span>
+                  <span className="font-medium text-yellow-600">{dashboard.total - dashboard.signedConsents}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Conversion Rate</h3>
+                <span className="text-2xl font-bold text-green-deep">{dashboard.conversionRate}%</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Active Patients</span>
+                  <span className="font-medium text-green-600">{dashboard.active}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Outreach Backlog</span>
+                  <span className="font-medium text-red-600">{dashboard.outreachBacklog}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Priority Alerts</h3>
+                <span className="text-2xl font-bold text-red-600">{dashboard.highRisk}</span>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">High Risk</span>
+                  <span className="font-medium text-red-600">{dashboard.highRisk}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-text-mid">Due Today</span>
+                  <span className="font-medium text-blue-600">{dashboard.dueToday}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity & Tasks */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <h3 className="text-lg font-dm-sans font-semibold text-green-deep mb-4">Today's Tasks</h3>
+              <div className="space-y-3">
+                {tasksSeed.slice(0, 4).map((task) => (
+                  <div key={task.id} className="flex items-start gap-3">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      task.priority === "High" ? "bg-red-500" :
+                      task.priority === "Medium" ? "bg-yellow-500" : "bg-green-500"
+                    }`} />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium font-dm-sans">{task.title}</p>
+                      <p className="text-xs text-gray-500 font-dm-sans">{task.owner} • {task.due}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Quick Actions</h3>
+              </div>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowLeadModal(true)}
+                  className="w-full text-left px-4 py-3 bg-gold text-green-deep rounded-lg font-dm-sans font-semibold text-[0.9rem] hover:bg-gold-light transition-colors shadow-sm"
+                >
+                  + New Lead
+                </button>
+                <button className="w-full text-left px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-dm-sans text-[0.9rem] hover:bg-gray-200 transition-colors">
+                  Generate Report
+                </button>
+                <button className="w-full text-left px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-dm-sans text-[0.9rem] hover:bg-gray-200 transition-colors">
+                  Send Reminders
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeSection === "pipeline" && (
+        <div className="grid gap-6 lg:grid-cols-4">
+          {pipelineStages.map((stage) => {
+            const stagePatients = patients.filter((p) => p.stage === stage)
+            return (
+              <div key={stage} className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-dm-sans font-semibold text-green-deep">{stage}</h3>
+                  <span className={`px-2 py-1 rounded text-xs font-medium font-dm-sans ${getStageColor(stage)}`}>
+                    {stagePatients.length}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {stagePatients.map((patient) => (
+                    <div key={patient.id} className="border border-gray-200 rounded-lg p-3">
+                      <p className="font-medium font-dm-sans text-sm">{patient.name}</p>
+                      <p className="text-xs text-gray-600 font-dm-sans">{patient.program}</p>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          className="text-xs bg-gray-100 px-2 py-1 rounded font-dm-sans"
+                          disabled={patient.stage === pipelineStages[0]}
+                          onClick={() => movePatientStage(patient, -1)}
+                        >
+                          ←
+                        </button>
+                        <button
+                          className="text-xs bg-green-deep text-white px-2 py-1 rounded font-dm-sans"
+                          disabled={patient.stage === pipelineStages[pipelineStages.length - 1]}
+                          onClick={() => movePatientStage(patient, 1)}
+                        >
+                          →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {activeSection === "coordinator" && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+            <h3 className="text-lg font-dm-sans font-semibold text-green-deep mb-4">Coordinator Workload</h3>
+            <div className="space-y-3">
+              {coordinatorStats.map((item) => (
+                <div key={item.owner} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium font-dm-sans">{item.owner}</p>
+                    <span className="text-sm text-gray-600 font-dm-sans">{item.total} patients</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="bg-red-50 rounded p-2 text-center">
+                      <p className="text-red-700 font-medium font-dm-sans">{item.highRisk}</p>
+                      <p className="text-xs text-red-600 font-dm-sans">High Risk</p>
+                    </div>
+                    <div className="bg-yellow-50 rounded p-2 text-center">
+                      <p className="text-yellow-700 font-medium font-dm-sans">{item.dueToday}</p>
+                      <p className="text-xs text-yellow-600 font-dm-sans">Due Today</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {selectedPatient && (
+            <div className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
+              <h3 className="text-lg font-dm-sans font-semibold text-green-deep mb-4">{selectedPatient.owner} Worklist</h3>
+              <div className="space-y-3">
+                {coordinatorPatients.slice(0, 5).map((patient) => (
+                  <div key={patient.id} className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium font-dm-sans text-sm">{patient.name}</p>
+                        <p className="text-xs text-gray-600 font-dm-sans">{patient.stage} • {patient.nextStep}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium font-dm-sans ${
+                        patient.risk === "High" ? "bg-red-100 text-red-800" :
+                        patient.risk === "Medium" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-green-100 text-green-800"
+                      }`}>
+                        {patient.risk}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* AI Agent Panel */}
+      {showAgentPanel && activeSection === "ai-agent" && (
+        <div className="bg-white rounded-[20px] p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-dm-sans font-bold text-green-deep">
+                AI Assistant
+              </h2>
+              <p className="text-text-mid mt-1">
+                Get intelligent insights and recommendations for patient management
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAgentPanel(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-gray-50 rounded-[16px] p-4">
+                <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => runAgentAction("brief")}
+                    className="px-3 py-2 bg-white rounded-lg text-sm font-dm-sans hover:bg-gray-100 transition-colors border"
+                  >
+                    Patient Summary
+                  </button>
+                  <button
+                    onClick={() => runAgentAction("outreach")}
+                    className="px-3 py-2 bg-white rounded-lg text-sm font-dm-sans hover:bg-gray-100 transition-colors border"
+                  >
+                    Draft Message
+                  </button>
+                  <button
+                    onClick={() => runAgentAction("consent")}
+                    className="px-3 py-2 bg-white rounded-lg text-sm font-dm-sans hover:bg-gray-100 transition-colors border"
+                  >
+                    Consent Help
+                  </button>
+                  <button
+                    onClick={() => runAgentAction("calendar")}
+                    className="px-3 py-2 bg-white rounded-lg text-sm font-dm-sans hover:bg-gray-100 transition-colors border"
+                  >
+                    Schedule Advice
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {agentMessages.map((message, index) => (
+                  <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] px-4 py-2 rounded-lg ${
+                      message.role === "user"
+                        ? "bg-green-deep text-white"
+                        : "bg-gray-100 text-gray-900"
+                    }`}>
+                      <p className="text-sm font-dm-sans">{message.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-[16px] p-4">
+                <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Patient Context</h3>
+                {selectedPatient && (
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Name:</strong> {selectedPatient.name}</p>
+                    <p><strong>Stage:</strong> {selectedPatient.stage}</p>
+                    <p><strong>Risk:</strong> <span className={getRiskColor(selectedPatient.risk)}>{selectedPatient.risk}</span></p>
+                    <p><strong>Next Step:</strong> {selectedPatient.nextStep}</p>
+                    <p><strong>Consent:</strong> {selectedPatient.consentStatus}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-50 rounded-[16px] p-4">
+                <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Smart Suggestions</h3>
+                <div className="space-y-2">
+                  {selectedPatient && (
+                    <>
+                      {selectedPatient.consentStatus === "Pending" && (
+                        <div className="p-2 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                          <p className="text-xs font-dm-sans text-yellow-800">
+                            Send consent reminder via {selectedPatient.preferred.toLowerCase()}
+                          </p>
+                        </div>
+                      )}
+                      {selectedPatient.risk === "High" && selectedPatient.stage === "Outreach" && (
+                        <div className="p-2 bg-red-50 rounded border-l-4 border-red-400">
+                          <p className="text-xs font-dm-sans text-red-800">
+                            Priority: High-risk patient needs immediate outreach
+                          </p>
+                        </div>
+                      )}
+                      {selectedPatient.documentCount === 0 && (
+                        <div className="p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                          <p className="text-xs font-dm-sans text-blue-800">
+                            Upload intake forms and consent documents
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Creation Modal */}
+      {showLeadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[20px] p-6 shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-dm-sans font-bold text-green-deep">Add New Lead</h3>
+              <button onClick={() => setShowLeadModal(false)} className="text-gray-500 hover:text-gray-700">
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block font-dm-sans font-medium text-green-deep mb-1">Name *</label>
+                <input
+                  type="text"
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({...leadForm, name: e.target.value})}
+                  className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  placeholder="Patient name"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={leadForm.phone}
+                    onChange={(e) => setLeadForm({...leadForm, phone: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={leadForm.email}
+                    onChange={(e) => setLeadForm({...leadForm, email: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                    placeholder="Email address"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Source</label>
+                  <select
+                    value={leadForm.source}
+                    onChange={(e) => setLeadForm({...leadForm, source: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    <option>Website Lead</option>
+                    <option>Referral</option>
+                    <option>Social Media</option>
+                    <option>Event</option>
+                    <option>Advertisement</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Program</label>
+                  <select
+                    value={leadForm.program}
+                    onChange={(e) => setLeadForm({...leadForm, program: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    <option>Cardiometabolic Care</option>
+                    <option>Hormonal Health</option>
+                    <option>Nutritional Medicine</option>
+                    <option>Preventive Care</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Owner</label>
+                  <select
+                    value={leadForm.owner}
+                    onChange={(e) => setLeadForm({...leadForm, owner: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    <option>Tola</option>
+                    <option>Ada</option>
+                    <option>Korede</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Risk Level</label>
+                  <select
+                    value={leadForm.risk}
+                    onChange={(e) => setLeadForm({...leadForm, risk: e.target.value as Risk})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={leadForm.consent}
+                  onChange={(e) => setLeadForm({...leadForm, consent: e.target.checked})}
+                  className="w-4 h-4 rounded border-green-deep/20"
+                />
+                <label className="font-dm-sans text-sm text-text-mid">
+                  Consent packet sent
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowLeadModal(false)}
+                className="flex-1 px-4 py-2 rounded-lg border border-green-deep/20 font-dm-sans hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createLead}
+                disabled={!leadForm.name.trim()}
+                className="flex-1 px-4 py-2 rounded-lg bg-green-deep text-white font-dm-sans hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Create Lead
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

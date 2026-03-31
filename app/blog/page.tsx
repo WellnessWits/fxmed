@@ -4,7 +4,6 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { useState, useMemo, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 interface BlogPost {
   id: string
@@ -31,13 +30,10 @@ export default function BlogPage() {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
+      const response = await fetch('/api/blog?status=published')
+      if (!response.ok) throw new Error('Failed to fetch posts')
       
-      if (error) throw error
+      const { posts: data } = await response.json()
       setBlogPosts(data || [])
     } catch (error) {
       console.error('Error fetching posts:', error)
@@ -226,13 +222,30 @@ export default function BlogPage() {
                         {post.category}
                       </span>
                     </div>
-                    
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="p-6">
+                    <div className="flex items-center mb-3 text-text-mid text-[0.85rem]">
+                      <span>{new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                      <span className="mx-2">•</span>
+                      <span>{post.read_time}</span>
+                    </div>
+
+                    <h3 className="font-dm-sans font-bold text-green-deep text-[1.25rem] leading-[1.3] mb-3 line-clamp-2">
+                      {post.title}
+                    </h3>
+
+                    <p className="font-dm-sans text-text-mid text-[0.95rem] leading-[1.6] mb-4 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+
                     <div className="flex items-center justify-between">
                       <span className="text-text-mid text-[0.9rem] font-medium">
                         By {post.author}
                       </span>
                       <Link 
-                        href={`/blog/${post.id}`}
+                        href={`/blog/${post.slug}`}
                         className="font-dm-sans text-gold text-green-deep font-semibold text-[0.95rem] no-underline hover:text-green-mid transition-colors"
                       >
                         Read More →

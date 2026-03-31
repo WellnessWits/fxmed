@@ -436,13 +436,19 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
         const resolvedSlug = resolvedParams.slug
         setSlug(resolvedSlug)
         
-        console.log('Resolved slug:', resolvedSlug)
+        // Fetch from API
+        const response = await fetch(`/api/blog?slug=${resolvedSlug}`)
+        if (!response.ok) {
+          notFound()
+          return
+        }
         
-        const postData = blogPosts[resolvedSlug as keyof typeof blogPosts]
+        const { posts } = await response.json()
+        const postData = posts?.[0]
         
         if (!postData) {
-          console.log('Post not found for slug:', resolvedSlug)
           notFound()
+          return
         }
         
         setPost(postData)
@@ -470,6 +476,13 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
                 Loading article...
               </p>
             </div>
+          ) : !post ? (
+            <div className="text-center py-16">
+              <div className="text-4xl mb-4">❌</div>
+              <p className="font-dm-sans text-text-mid text-[1.1rem]">
+                Article not found
+              </p>
+            </div>
           ) : (
             <>
               {/* Breadcrumb */}
@@ -491,13 +504,13 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
               {/* Article Meta */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
-                  <div className="text-4xl mr-4">{post.emoji}</div>
+                  <div className="text-4xl mr-4">📝</div>
                   <div>
                     <span className={`inline-block px-3 py-1 rounded-[20px] text-[0.8rem] font-dm-sans font-semibold mb-2 ${getCategoryColor(post.category)}`}>
                       {post.category}
                     </span>
                     <div className="text-text-mid text-[0.9rem]">
-                      {post.date} • {post.readTime}
+                      {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} • {post.read_time}
                     </div>
                   </div>
                 </div>
@@ -519,7 +532,7 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
               {/* Article Content */}
               <div className="bg-white rounded-[20px] p-8 shadow-lg">
                 <div className="prose prose-lg max-w-none">
-                  {post.content.split('\n').map((paragraph, index) => {
+                  {post.content.split('\n').map((paragraph: string, index: number) => {
                     if (paragraph.startsWith('# ')) {
                       return <h1 key={index} className="font-dm-sans font-bold text-green-deep text-[2rem] mb-4">{paragraph.slice(2)}</h1>
                     } else if (paragraph.startsWith('## ')) {
@@ -571,7 +584,6 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
                         className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow no-underline"
                       >
                         <div className="flex items-start mb-3">
-                          <div className="text-2xl mr-3">{relatedPost.emoji}</div>
                           <div>
                             <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
                               {relatedPost.title}
