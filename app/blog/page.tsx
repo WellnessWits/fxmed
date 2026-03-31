@@ -3,13 +3,49 @@
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+
+interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  author: string
+  category: string
+  thumbnail_url: string
+  read_time: string
+  created_at: string
+}
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Category color mapping
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      setBlogPosts(data || [])
+    } catch (error) {
+      console.error('Error fetching posts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
       'Health Education': 'bg-blue-500 text-white',
@@ -21,87 +57,6 @@ export default function BlogPage() {
     }
     return colors[category] || 'bg-gray-500 text-white'
   }
-
-  // Get posts from admin panel or fallback to static posts
-  const getBlogPosts = () => {
-    if (typeof window !== 'undefined') {
-      const adminPosts = localStorage.getItem('blogPosts')
-      if (adminPosts) {
-        return JSON.parse(adminPosts)
-      }
-    }
-    // Fallback to static posts
-    return [
-      {
-        id: 'understanding-lab-results',
-        title: 'Understanding Your Lab Results',
-        excerpt: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
-        content: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
-        author: 'FXMed Team',
-        date: '2024-03-15',
-        readTime: '5 min read',
-        category: 'Health Education',
-        thumbnail: '/blog/lab-results.jpg'
-      },
-      {
-        id: 'preventive-care-strategies',
-        title: 'Preventive Care Strategies',
-        excerpt: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
-        content: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
-        author: 'FXMed Team',
-        date: '2024-03-10',
-        readTime: '8 min read',
-        category: 'Preventive Medicine',
-        thumbnail: '/blog/preventive-care.jpg'
-      },
-      {
-        id: 'nutrition-mental-wellness',
-        title: 'Nutrition for Mental Wellness',
-        excerpt: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
-        content: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
-        author: 'FXMed Team',
-        date: '2024-03-05',
-        readTime: '6 min read',
-        category: 'Nutrition',
-        thumbnail: '/blog/nutrition-mental.jpg'
-      },
-      {
-        id: 'functional-medicine-basics',
-        title: 'Functional Medicine Basics',
-        excerpt: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
-        content: 'Understanding the core principles of functional medicine and how it differs from conventional medicine.',
-        author: 'Dr. Kike Oduba',
-        date: '2024-02-28',
-        readTime: '10 min read',
-        category: 'Functional Medicine',
-        thumbnail: '/blog/functional-medicine.jpg'
-      },
-      {
-        id: 'mobile-healthcare-benefits',
-        title: 'Mobile Healthcare Benefits',
-        excerpt: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
-        content: 'How mobile healthcare services are revolutionizing patient care and improving health outcomes.',
-        author: 'FXMed Team',
-        date: '2024-02-20',
-        readTime: '7 min read',
-        category: 'Mobile Health',
-        thumbnail: '/blog/mobile-healthcare.jpg'
-      },
-      {
-        id: 'hormonal-balance-tips',
-        title: 'Achieving Hormonal Balance',
-        excerpt: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
-        content: 'Natural approaches to balancing hormones for better health, energy, and wellbeing.',
-        author: 'Dr. Oladele Isaac',
-        date: '2024-02-15',
-        readTime: '9 min read',
-        category: 'Hormonal Health',
-        thumbnail: '/blog/hormonal-balance.jpg'
-      }
-    ]
-  }
-
-  const blogPosts = getBlogPosts()
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -248,7 +203,7 @@ export default function BlogPage() {
                   {/* Thumbnail Image */}
                   <div className="relative h-48 overflow-hidden">
                     <img 
-                      src={post.thumbnail} 
+                      src={post.thumbnail_url || '/blog/default.jpg'} 
                       alt={post.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
@@ -259,7 +214,7 @@ export default function BlogPage() {
                           target.style.display = 'none'
                           parent.innerHTML = `
                             <div class="w-full h-full bg-gradient-to-br from-green-deep/10 to-green-mid/10 flex items-center justify-center">
-                              <div class="text-6xl">${post.emoji}</div>
+                              <div class="text-6xl">📝</div>
                             </div>
                           `
                         }
@@ -271,20 +226,6 @@ export default function BlogPage() {
                         {post.category}
                       </span>
                     </div>
-                  </div>
-                  
-                  {/* Post Content */}
-                  <div className="p-6">
-                    <div className="flex items-center mb-3">
-                      <div className="text-2xl mr-2">{post.emoji}</div>
-                      <div className="text-text-mid text-[0.85rem]">
-                        {post.date} • {post.readTime}
-                      </div>
-                    </div>
-                    
-                    <h2 className="font-dm-sans font-bold text-green-deep text-[1.3rem] leading-[1.3] mb-3">
-                      {post.title}
-                    </h2>
                     
                     <div className="flex items-center justify-between">
                       <span className="text-text-mid text-[0.9rem] font-medium">

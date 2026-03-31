@@ -2,17 +2,21 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 interface BlogPost {
   id: string
   title: string
+  slug: string
   excerpt: string
   content: string
   author: string
-  date: string
-  readTime: string
   category: string
-  thumbnail: string
+  thumbnail_url: string
+  status: 'draft' | 'published'
+  read_time: string
+  created_at: string
+  updated_at: string
 }
 
 type Stage = "Outreach" | "Enrollment" | "Onboarding" | "Follow-Up" | "Active"
@@ -98,7 +102,7 @@ export default function AdminPanel() {
     content: '',
     author: 'FXMed Team',
     category: 'Health Education',
-    thumbnail: ''
+    thumbnail_url: ''
   })
 
   // CRM Constants and Data
@@ -348,17 +352,24 @@ export default function AdminPanel() {
   })
 
   useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
     try {
-      const savedPosts = localStorage.getItem('blogPosts')
-      if (savedPosts) {
-        setPosts(JSON.parse(savedPosts))
-      }
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      setPosts(data || [])
     } catch (error) {
-      console.error('Error loading posts:', error)
+      console.error('Error fetching posts:', error)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
   // CRM Helper Functions
   function initials(name: string) {
@@ -589,54 +600,72 @@ export default function AdminPanel() {
       const reader = new FileReader()
       reader.onload = (event) => {
         const dataUrl = event.target?.result as string
-        setFormData(prev => ({ ...prev, thumbnail: dataUrl }))
+        setFormData(prev => ({ ...prev, thumbnail_url: dataUrl }))
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const newPost: BlogPost = {
-      id: formData.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || Date.now().toString(),
+    const slug = formData.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || Date.now().toString()
+    
+    const newPost = {
       title: formData.title || '',
+      slug: slug,
       excerpt: formData.excerpt || '',
       content: formData.content || '',
       author: formData.author || 'FXMed Team',
-      date: new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }),
-      readTime: calculateReadTime(formData.content || ''),
       category: formData.category || 'Health Education',
-      thumbnail: formData.thumbnail || ''
+      thumbnail_url: formData.thumbnail_url || '',
+      status: 'published' as const,
+      read_time: calculateReadTime(formData.content || '')
     }
 
-    const updatedPosts = [...posts, newPost]
-    setPosts(updatedPosts)
-    localStorage.setItem('blogPosts', JSON.stringify(updatedPosts))
-    
-    setFormData({
-      title: '',
-      excerpt: '',
-      content: '',
-      author: 'FXMed Team',
-      date: new Date().toISOString().split('T')[0],
-      readTime: '5 min read',
-      category: 'Health Education',
-      thumbnail: ''
-    })
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert(newPost)
+        .select()
+        .single()
+      
+      if (error) throw error
+      
+      setPosts([data, ...posts])
+      
+      setFormData({
+        title: '',
+        excerpt: '',
+        content: '',
+        author: 'FXMed Team',
+        category: 'Health Education',
+        thumbnail_url: ''
+      })
 
-    alert('Blog post created successfully!')
+      alert('Blog post created successfully!')
+    } catch (error) {
+      console.error('Error creating post:', error)
+      alert('Error creating blog post. Please try again.')
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this post?')) {
-      const updatedPosts = posts.filter(post => post.id !== id)
-      setPosts(updatedPosts)
-      localStorage.setItem('blogPosts', JSON.stringify(updatedPosts))
+      try {
+        const { error } = await supabase
+          .from('blog_posts')
+          .delete()
+          .eq('id', id)
+        
+        if (error) throw error
+        
+        const updatedPosts = posts.filter(post => post.id !== id)
+        setPosts(updatedPosts)
+      } catch (error) {
+        console.error('Error deleting post:', error)
+        alert('Error deleting post. Please try again.')
+      }
     }
   }
 
@@ -773,10 +802,10 @@ export default function AdminPanel() {
                         onChange={handleImageUpload}
                         className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
                       />
-                      {formData.thumbnail && (
+                      {formData.thumbnail_url && (
                         <div className="mt-3">
                           <img 
-                            src={formData.thumbnail} 
+                            src={formData.thumbnail_url} 
                             alt="Thumbnail preview" 
                             className="h-48 w-full object-cover rounded-[12px]"
                           />
@@ -846,12 +875,18 @@ export default function AdminPanel() {
                     />
                   </div>
 
-                  <div>
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       type="submit"
                       className="w-full md:w-auto bg-gold text-green-deep px-8 py-[12px] rounded-[30px] font-dm-sans font-semibold text-[0.95rem] transition-all hover:bg-gold-light hover:transform hover:translate-y-[-1px] shadow-md"
                     >
                       Create Blog Post
+                    </button>
+                    <button
+                      type="button"
+                      className="w-full md:w-auto bg-white border-2 border-green-deep text-green-deep px-8 py-[12px] rounded-[30px] font-dm-sans font-semibold text-[0.95rem] transition-all hover:bg-green-deep/10"
+                    >
+                      Save to drafts
                     </button>
                   </div>
                 </form>
@@ -906,14 +941,14 @@ export default function AdminPanel() {
                             
                             <div className="text-sm font-dm-sans text-text-mid space-y-1">
                               <p><span className="font-semibold">Category:</span> {post.category}</p>
-                              <p><span className="font-semibold">Date:</span> {post.date}</p>
+                              <p><span className="font-semibold">Date:</span> {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                               <p><span className="font-semibold">Author:</span> {post.author}</p>
-                              <p><span className="font-semibold">Read Time:</span> {post.readTime}</p>
+                              <p><span className="font-semibold">Read Time:</span> {post.read_time}</p>
                             </div>
                             
-                            {post.thumbnail && (
+                            {post.thumbnail_url && (
                               <img 
-                                src={post.thumbnail} 
+                                src={post.thumbnail_url} 
                                 alt={post.title} 
                                 className="w-full h-24 object-cover rounded-[12px] mt-3"
                               />
