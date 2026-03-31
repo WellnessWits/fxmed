@@ -17,6 +17,7 @@ interface BlogPost {
 
 type Stage = "Outreach" | "Enrollment" | "Onboarding" | "Follow-Up" | "Active"
 type NavItem = "overview" | "pipeline" | "coordinator" | "calendar" | "documents" | "reporting" | "ai-agent"
+type BlogNavItem = "new-blog" | "drafts" | "posted"
 type Risk = "High" | "Medium" | "Low"
 
 type Patient = {
@@ -90,13 +91,12 @@ export default function AdminPanel() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'blog' | 'crm'>('blog')
+  const [activeBlogSection, setActiveBlogSection] = useState<BlogNavItem>("new-blog")
   const [formData, setFormData] = useState<Partial<BlogPost>>({
     title: '',
     excerpt: '',
     content: '',
     author: 'FXMed Team',
-    date: new Date().toISOString().split('T')[0],
-    readTime: '5 min read',
     category: 'Health Education',
     thumbnail: ''
   })
@@ -111,6 +111,13 @@ export default function AdminPanel() {
     { id: "documents", label: "Documents" },
     { id: "reporting", label: "Reporting" },
     { id: "ai-agent", label: "AI Agent" },
+  ]
+
+  // Blog Navigation Items
+  const blogNavItems: { id: BlogNavItem; label: string }[] = [
+    { id: "new-blog", label: "New Blog" },
+    { id: "drafts", label: "Drafts" },
+    { id: "posted", label: "Posted Blogs" },
   ]
 
   const patientsSeed: Patient[] = [
@@ -292,6 +299,23 @@ export default function AdminPanel() {
     { id: 3, type: "Lab Completion Reminder", patientId: "FX002", channel: "Email", status: "Scheduled", sendAt: "Tomorrow • 8:00 AM" },
     { id: 4, type: "Follow-up Check-in", patientId: "FX006", channel: "SMS", status: "Queued", sendAt: "Tomorrow • 9:30 AM" },
   ]
+
+  // Smart Read Time Calculator
+  const calculateReadTime = (content: string): string => {
+    // Remove HTML tags if any
+    const plainText = content.replace(/<[^>]*>/g, '')
+    
+    // Count words (more accurate than simple split)
+    const words = plainText.trim().split(/\s+/).filter(word => word.length > 0).length
+    
+    // Reading speed varies by content length
+    const wordsPerMinute = words < 100 ? 180 : words < 300 ? 200 : 220
+    
+    const readTime = Math.ceil(words / wordsPerMinute)
+    
+    // Round to nearest minute for display
+    return `${readTime} min read`
+  }
 
   // CRM State
   const [patients, setPatients] = useState<Patient[]>(patientsSeed)
@@ -580,8 +604,12 @@ export default function AdminPanel() {
       excerpt: formData.excerpt || '',
       content: formData.content || '',
       author: formData.author || 'FXMed Team',
-      date: formData.date || new Date().toISOString().split('T')[0],
-      readTime: formData.readTime || '5 min read',
+      date: new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
+      readTime: calculateReadTime(formData.content || ''),
       category: formData.category || 'Health Education',
       thumbnail: formData.thumbnail || ''
     }
@@ -700,7 +728,26 @@ export default function AdminPanel() {
                   </Link>
                 </div>
               
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Blog Navigation Tabs */}
+                <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                  {blogNavItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveBlogSection(item.id)}
+                      className={`px-4 py-2 rounded-md font-dm-sans text-[0.85rem] font-medium transition-colors ${
+                        activeBlogSection === item.id
+                          ? 'bg-white text-green-deep shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Blog Content Based on Active Section */}
+                {activeBlogSection === 'new-blog' && (
+                  <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block font-dm-sans font-semibold text-green-deep mb-2">
@@ -712,68 +759,6 @@ export default function AdminPanel() {
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                         className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
                         placeholder="Enter blog post title..."
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
-                        Category
-                      </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
-                        required
-                      >
-                        {categories.map(category => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
-                        Author
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.author}
-                        onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
-                        placeholder="Author name..."
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
-                        Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
-                        Read Time
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.readTime}
-                        onChange={(e) => setFormData(prev => ({ ...prev, readTime: e.target.value }))}
-                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
-                        placeholder="5 min read"
                         required
                       />
                     </div>
@@ -793,10 +778,43 @@ export default function AdminPanel() {
                           <img 
                             src={formData.thumbnail} 
                             alt="Thumbnail preview" 
-                            className="h-20 w-20 object-cover rounded-[12px]"
+                            className="h-48 w-full object-cover rounded-[12px]"
                           />
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
+                        Author
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.author}
+                        onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
+                        placeholder="Author name..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-dm-sans font-semibold text-green-deep mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-[12px] font-dm-sans text-[1rem] border-2 border-green-deep/20 focus:outline-none focus:border-gold transition-colors"
+                        required
+                      >
+                        {categories.map(category => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -837,58 +855,75 @@ export default function AdminPanel() {
                     </button>
                   </div>
                 </form>
+                )}
 
-                <div className="mt-10 pt-6 border-t border-green-deep/10">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-lg font-dm-sans font-semibold text-green-deep">
-                        Existing Posts ({posts.length})
-                      </h3>
-                      <p className="text-sm text-text-mid mt-1">
-                        Manage your published content
-                      </p>
-                    </div>
+                {/* Drafts Section */}
+                {activeBlogSection === 'drafts' && (
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-4">📝</div>
+                    <h3 className="text-xl font-dm-sans font-semibold text-green-deep mb-2">
+                      Draft Posts
+                    </h3>
+                    <p className="text-text-mid">
+                      Save drafts here before publishing
+                    </p>
                   </div>
-                
-                  {posts.length === 0 ? (
-                    <div className="bg-gray-50 rounded-[16px] p-8 text-center">
-                      <p className="font-dm-sans text-text-mid">
-                        No posts yet. Create your first post above!
-                      </p>
+                )}
+
+                {/* Posted Blogs Section */}
+                {activeBlogSection === 'posted' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-lg font-dm-sans font-semibold text-green-deep">
+                          Published Posts ({posts.length})
+                        </h3>
+                        <p className="text-sm text-text-mid mt-1">
+                          View and manage your published content
+                        </p>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-                      {posts.map(post => (
-                        <div key={post.id} className="bg-gray-50 border border-green-deep/8 rounded-[16px] p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-start justify-between mb-3">
-                            <h4 className="font-dm-sans font-medium text-green-deep truncate flex-1 pr-2">{post.title}</h4>
-                            <button
-                              onClick={() => handleDelete(post.id)}
-                              className="text-red-600 hover:text-red-800 text-sm font-dm-sans flex-shrink-0 px-2 py-1 rounded hover:bg-red-50 transition-colors"
-                            >
-                              Delete
-                            </button>
+                  
+                    {posts.length === 0 ? (
+                      <div className="bg-gray-50 rounded-[16px] p-8 text-center">
+                        <p className="font-dm-sans text-text-mid">
+                          No posts yet. Create your first post above!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                        {posts.map(post => (
+                          <div key={post.id} className="bg-gray-50 border border-green-deep/8 rounded-[16px] p-4 hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="font-dm-sans font-medium text-green-deep truncate flex-1 pr-2">{post.title}</h4>
+                              <button
+                                onClick={() => handleDelete(post.id)}
+                                className="text-red-600 hover:text-red-800 text-sm font-dm-sans flex-shrink-0 px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                            
+                            <div className="text-sm font-dm-sans text-text-mid space-y-1">
+                              <p><span className="font-semibold">Category:</span> {post.category}</p>
+                              <p><span className="font-semibold">Date:</span> {post.date}</p>
+                              <p><span className="font-semibold">Author:</span> {post.author}</p>
+                              <p><span className="font-semibold">Read Time:</span> {post.readTime}</p>
+                            </div>
+                            
+                            {post.thumbnail && (
+                              <img 
+                                src={post.thumbnail} 
+                                alt={post.title} 
+                                className="w-full h-24 object-cover rounded-[12px] mt-3"
+                              />
+                            )}
                           </div>
-                          
-                          <div className="text-sm font-dm-sans text-text-mid space-y-1">
-                            <p><span className="font-semibold">Category:</span> {post.category}</p>
-                            <p><span className="font-semibold">Date:</span> {post.date}</p>
-                            <p><span className="font-semibold">Author:</span> {post.author}</p>
-                            <p><span className="font-semibold">Read Time:</span> {post.readTime}</p>
-                          </div>
-                          
-                          {post.thumbnail && (
-                            <img 
-                              src={post.thumbnail} 
-                              alt={post.title} 
-                              className="w-full h-24 object-cover rounded-[12px] mt-3"
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
             
@@ -906,9 +941,6 @@ export default function AdminPanel() {
                   <div className="flex gap-2">
                     <button className="bg-gold text-green-deep px-4 py-2 rounded-[12px] font-dm-sans font-semibold text-[0.9rem] hover:bg-gold-light transition-colors shadow-sm" onClick={() => setShowLeadModal(true)}>
                       + New Lead
-                    </button>
-                    <button className="bg-white border-2 border-green-deep text-green-deep px-4 py-2 rounded-[12px] font-dm-sans font-semibold text-[0.9rem] hover:bg-green-deep/10 transition-colors" onClick={() => setActiveSection("pipeline")}>
-                      Pipeline
                     </button>
                   </div>
                 </div>
