@@ -295,81 +295,127 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-deep mx-auto mb-4"></div>
-          <p className="text-gray-600 font-dm-sans">Loading admin panel...</p>
+          <p className="text-text-mid font-dm-sans">Loading admin panel...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-dm-sans font-bold text-green-deep">
-              FXMED Admin Panel
+    <div className="min-h-screen bg-cream flex flex-col">
+      {/* Top Header */}
+      <header className="bg-green-deep shadow-custom border-b border-green-deep/20">
+        <div className="flex items-center justify-between px-[5%] py-[18px]">
+          <div className="flex items-center space-x-4">
+            <img 
+              src="/logo.png" 
+              alt="FXMed" 
+              className="h-[120px] w-auto"
+            />
+          </div>
+          <div className="text-right">
+            <h1 className="text-2xl font-dm-sans font-bold text-cream">
+              Admin Panel
             </h1>
-            <p className="text-text-mid mt-2">
-              Manage your blog, CRM, and SEO analytics
+            <p className="text-sm text-cream/70">
+              Management Dashboard
             </p>
           </div>
         </div>
+      </header>
 
-        {/* Main Navigation */}
-        <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
-          <button
-            onClick={() => setActiveTab('blog')}
-            className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors text-left ${
-              activeTab === 'blog'
-                ? 'bg-green-deep text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            📝 Blog Management
-          </button>
-          <button
-            onClick={() => setActiveTab('crm')}
-            className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors text-left ${
-              activeTab === 'crm'
-                ? 'bg-green-deep text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            👥 CRM
-          </button>
-          <button
-            onClick={() => setActiveTab('seo')}
-            className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors text-left ${
-              activeTab === 'seo'
-                ? 'bg-green-deep text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            📈 SEO Analytics
-          </button>
+      <div className="flex flex-1">
+        {/* Left Sidebar Navigation */}
+        <div className="w-64 bg-green-deep/95 border-r border-green-deep/20">
+          {/* Admin Dashboard Title */}
+          <div className="px-4 pt-6 pb-4">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 px-4 py-3">
+              <h3 className="text-center font-dm-sans font-bold text-cream text-sm tracking-wider">
+                ADMIN DASHBOARD
+              </h3>
+            </div>
+          </div>
+          
+          {/* Main Navigation */}
+          <nav className="px-4 pb-6">
+            <div className="space-y-2">
+              <button
+                onClick={() => setActiveTab('blog')}
+                className={`w-full px-4 py-3 rounded-lg font-dm-sans text-sm font-medium transition-all text-left flex items-center space-x-3 ${
+                  activeTab === 'blog'
+                    ? 'bg-gold text-green-deep shadow-md'
+                    : 'text-cream/85 hover:bg-green-deep/20 hover:text-cream'
+                }`}
+              >
+                <span>📝</span>
+                <span>Blog Management</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('crm')}
+                className={`w-full px-4 py-3 rounded-lg font-dm-sans text-sm font-medium transition-all text-left flex items-center space-x-3 ${
+                  activeTab === 'crm'
+                    ? 'bg-gold text-green-deep shadow-md'
+                    : 'text-cream/85 hover:bg-green-deep/20 hover:text-cream'
+                }`}
+              >
+                <span>👥</span>
+                <span>CRM</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('seo')}
+                className={`w-full px-4 py-3 rounded-lg font-dm-sans text-sm font-medium transition-all text-left flex items-center space-x-3 ${
+                  activeTab === 'seo'
+                    ? 'bg-gold text-green-deep shadow-md'
+                    : 'text-cream/85 hover:bg-green-deep/20 hover:text-cream'
+                }`}
+              >
+                <span>📈</span>
+                <span>SEO Analytics</span>
+              </button>
+            </div>
+          </nav>
         </div>
 
-        {/* Content Area */}
-        {activeTab === 'blog' && (
-          <BlogManagement posts={posts} setPosts={setPosts} />
-        )}
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-auto">
+          <div className="max-w-6xl mx-auto px-8 py-8">
+            {/* Content Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-dm-sans font-bold text-green-deep mb-2">
+                {activeTab === 'blog' && 'Blog Management'}
+                {activeTab === 'crm' && 'CRM Dashboard'}
+                {activeTab === 'seo' && 'SEO Analytics'}
+              </h2>
+              <p className="text-text-mid">
+                {activeTab === 'blog' && 'Manage your blog posts, drafts, and content'}
+                {activeTab === 'crm' && 'Track patients, manage pipeline, and optimize outreach'}
+                {activeTab === 'seo' && 'Monitor search performance and optimize content'}
+              </p>
+            </div>
 
-        {activeTab === 'crm' && (
-          <CrmDashboard
-            patients={patients}
-            setPatients={setPatients}
-            showLeadModal={showLeadModal}
-            setShowLeadModal={setShowLeadModal}
-            leadForm={leadForm}
-            setLeadForm={setLeadForm}
-            createLead={createLead}
-          />
-        )}
+            {/* Content Area */}
+            {activeTab === 'blog' && (
+              <BlogManagement posts={posts} setPosts={setPosts} />
+            )}
 
-        {activeTab === 'seo' && <SeoAnalytics />}
+            {activeTab === 'crm' && (
+              <CrmDashboard
+                patients={patients}
+                setPatients={setPatients}
+                showLeadModal={showLeadModal}
+                setShowLeadModal={setShowLeadModal}
+                leadForm={leadForm}
+                setLeadForm={setLeadForm}
+                createLead={createLead}
+              />
+            )}
+
+            {activeTab === 'seo' && <SeoAnalytics />}
+          </div>
+        </div>
       </div>
     </div>
   )
