@@ -231,7 +231,7 @@ export default function Programs() {
                   </div>
                 </div>
 
-                <div className="flex gap-4 mt-6">
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <a href="#contact" className="font-dm-sans bg-gold text-green-deep px-8 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block text-center">
                   Book Maternal Consultation →
                 </a>

@@ -12,7 +12,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-[rgba(15,36,25,0.92)] via-[rgba(26,61,46,0.7)] to-[rgba(30,74,53,0.4)]"></div>
       
       {/* Glassmorphism Icons */}
-      <div className="absolute top-[480px] left-[20%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float">
+      <div className="absolute top-[480px] left-[20%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float hidden md:flex">
         <img 
           src="/Sparkle.svg" 
           alt="Sparkle" 
@@ -20,7 +20,7 @@ export default function Hero() {
         />
       </div>
       
-      <div className="absolute top-40 right-[35%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed">
+      <div className="absolute top-40 right-[35%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed hidden md:flex">
         <img 
           src="/Ambulance.svg?v=3" 
           alt="Ambulance" 
@@ -28,7 +28,7 @@ export default function Hero() {
         />
       </div>
       
-      <div className="absolute bottom-40 left-[30%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float">
+      <div className="absolute bottom-40 left-[30%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float hidden md:flex">
         <img 
           src="/BowlFood.svg" 
           alt="Bowl Food" 
@@ -36,7 +36,7 @@ export default function Hero() {
         />
       </div>
       
-      <div className="absolute top-60 left-1/4 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed">
+      <div className="absolute top-60 left-1/4 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed hidden md:flex">
         <img 
           src="/Hospital.svg" 
           alt="Hospital" 
@@ -44,7 +44,7 @@ export default function Hero() {
         />
       </div>
       
-      <div className="absolute top-[640px] right-[32%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float">
+      <div className="absolute top-[640px] right-[32%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float hidden md:flex">
         <img 
           src="/OrangeSlice.svg" 
           alt="Orange Slice" 
@@ -52,7 +52,7 @@ export default function Hero() {
         />
       </div>
       
-      <div className="absolute top-[45%] right-[20%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed">
+      <div className="absolute top-[45%] right-[20%] w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-center animate-float-delayed hidden md:flex">
         <img 
           src="/Avocado.svg?v=2" 
           alt="Avocado" 

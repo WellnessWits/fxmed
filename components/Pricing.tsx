@@ -65,9 +65,11 @@ export default function Pricing() {
             <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
               <div className="mb-6">
                 <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Standard</h3>
-                <div className="flex items-baseline mb-4">
+                <div className="mb-4">
                   <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦65,000</span>
-                  <span className="font-dm-sans text-text-mid text-[0.9rem] ml-2">per month</span>
+                </div>
+                <div className="mb-4">
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month</span>
                 </div>
               </div>
               
@@ -105,9 +107,11 @@ export default function Pricing() {
               
               <div className="mb-6 mt-2">
                 <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Gold</h3>
-                <div className="flex items-baseline mb-4">
+                <div className="mb-4">
                   <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦450,000</span>
-                  <span className="font-dm-sans text-text-mid text-[0.9rem] ml-2">per month · up to 3 family members</span>
+                </div>
+                <div className="mb-4">
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month · up to 3 family members</span>
                 </div>
               </div>
               
@@ -147,9 +151,11 @@ export default function Pricing() {
             <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
               <div className="mb-6">
                 <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Platinum</h3>
-                <div className="flex items-baseline mb-4">
+                <div className="mb-4">
                   <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦700,000</span>
-                  <span className="font-dm-sans text-text-mid text-[0.9rem] ml-2">per month · up to 5 family members</span>
+                </div>
+                <div className="mb-4">
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month · up to 5 family members</span>
                 </div>
               </div>
               
