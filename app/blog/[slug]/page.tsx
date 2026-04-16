@@ -501,6 +501,21 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
                 </Link>
               </nav>
 
+              {/* Article Thumbnail */}
+              {post.thumbnail_url && (
+                <div className="mb-8 rounded-[20px] overflow-hidden shadow-lg">
+                  <img 
+                    src={post.thumbnail_url} 
+                    alt={post.title}
+                    className="w-full h-64 md:h-80 object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      target.style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Article Meta */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">

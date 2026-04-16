@@ -102,22 +102,38 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// PATCH - Update post status (e.g., publish draft)
+// PATCH - Update post (status, content, or any fields)
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, status } = body
+    const { id, status, ...updateData } = body
     
-    if (!id || !status) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'ID and status required' },
+        { error: 'ID required' },
         { status: 400 }
       )
     }
     
+    // Build update object - include all provided fields
+    const updateObj: any = {
+      updated_at: new Date().toISOString()
+    }
+    
+    if (status) updateObj.status = status
+    if (updateData.title !== undefined) updateObj.title = updateData.title
+    if (updateData.slug !== undefined) updateObj.slug = updateData.slug
+    if (updateData.excerpt !== undefined) updateObj.excerpt = updateData.excerpt
+    if (updateData.content !== undefined) updateObj.content = updateData.content
+    if (updateData.author !== undefined) updateObj.author = updateData.author
+    if (updateData.category !== undefined) updateObj.category = updateData.category
+    if (updateData.thumbnail_url !== undefined) updateObj.thumbnail_url = updateData.thumbnail_url
+    if (updateData.thumbnail_alt !== undefined) updateObj.thumbnail_alt = updateData.thumbnail_alt
+    if (updateData.read_time !== undefined) updateObj.read_time = updateData.read_time
+    
     const { data, error } = await supabaseAdmin
       .from('blog_posts')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updateObj)
       .eq('id', id)
       .select()
       .single()

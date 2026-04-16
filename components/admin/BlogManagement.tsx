@@ -40,6 +40,7 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
   })
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   const blogNavItems = [
     { id: "new-blog", label: "New Blog" },
@@ -92,6 +93,61 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
 
     const slug = formData.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || Date.now().toString()
 
+    // If editing an existing published post, use PATCH to update
+    if (editingPost && editingPost.status === 'published') {
+      try {
+        const updateData = {
+          id: editingPost.id,
+          title: formData.title,
+          excerpt: formData.excerpt,
+          content: formData.content,
+          author: formData.author,
+          category: formData.category,
+          thumbnail_url: formData.thumbnail_url,
+          thumbnail_alt: formData.thumbnail_alt,
+          updated_at: new Date().toISOString()
+        }
+
+        const response = await fetch('/api/blog', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error('API error:', errorData)
+          throw new Error(errorData.error || 'Failed to update post')
+        }
+
+        const { post: data } = await response.json()
+
+        setPosts(posts.map(p => p.id === editingPost.id ? data : p))
+
+        setFormData({
+          title: '',
+          excerpt: '',
+          content: '',
+          author: 'FXMed Team',
+          category: 'Health Education',
+          thumbnail_url: '',
+          thumbnail_alt: ''
+        })
+
+        setEditingPost(null)
+        setNotification({ message: 'Published post updated successfully!', type: 'success' })
+        setTimeout(() => setNotification(null), 3000)
+      } catch (error) {
+        console.error('Error updating post:', error)
+        setNotification({ message: 'Error updating post. Please try again.', type: 'error' })
+        setTimeout(() => setNotification(null), 5000)
+      }
+      return
+    }
+
+    // Creating new post or updating draft
     const newPost = {
       title: formData.title || '',
       slug: slug,
@@ -100,17 +156,18 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
       author: formData.author || 'FXMed Team',
       category: formData.category || 'Health Education',
       thumbnail_url: formData.thumbnail_url || '',
-      status: 'published' as const,
+      thumbnail_alt: formData.thumbnail_alt || '',
+      status: editingPost ? editingPost.status : 'published' as const,
       read_time: calculateReadTime(formData.content || '')
     }
 
     try {
       const response = await fetch('/api/blog', {
-        method: 'POST',
+        method: editingPost ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newPost),
+        body: JSON.stringify(editingPost ? { id: editingPost.id, ...newPost } : newPost),
       })
 
       if (!response.ok) {
@@ -121,7 +178,7 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
 
       const { post: data } = await response.json()
 
-      setPosts([data, ...posts])
+      setPosts(editingPost ? posts.map(p => p.id === editingPost.id ? data : p) : [data, ...posts])
 
       setFormData({
         title: '',
@@ -133,7 +190,8 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
         thumbnail_alt: ''
       })
 
-      setNotification({ message: 'Blog post created successfully!', type: 'success' })
+      setEditingPost(null)
+      setNotification({ message: editingPost ? 'Post updated successfully!' : 'Blog post created successfully!', type: 'success' })
       setTimeout(() => setNotification(null), 3000)
     } catch (error) {
       console.error('Error creating post:', error)
@@ -145,6 +203,62 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
   const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    // If editing an existing post (published or draft), update it and set status to draft
+    if (editingPost) {
+      try {
+        const updateData = {
+          id: editingPost.id,
+          title: formData.title,
+          excerpt: formData.excerpt,
+          content: formData.content,
+          author: formData.author,
+          category: formData.category,
+          thumbnail_url: formData.thumbnail_url,
+          thumbnail_alt: formData.thumbnail_alt,
+          status: 'draft', // Convert to draft
+          updated_at: new Date().toISOString()
+        }
+
+        const response = await fetch('/api/blog', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error('API error:', errorData)
+          throw new Error(errorData.error || 'Failed to save draft')
+        }
+
+        const { post: data } = await response.json()
+
+        setPosts(posts.map(p => p.id === editingPost.id ? data : p))
+
+        setFormData({
+          title: '',
+          excerpt: '',
+          content: '',
+          author: 'FXMed Team',
+          category: 'Health Education',
+          thumbnail_url: '',
+          thumbnail_alt: ''
+        })
+
+        setEditingPost(null)
+        setNotification({ message: 'Saved as draft successfully!', type: 'success' })
+        setTimeout(() => setNotification(null), 3000)
+      } catch (error) {
+        console.error('Error saving draft:', error)
+        setNotification({ message: 'Error saving draft. Please try again.', type: 'error' })
+        setTimeout(() => setNotification(null), 5000)
+      }
+      return
+    }
+
+    // Creating new draft
     const slug = formData.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || Date.now().toString()
 
     const draftPost = {
@@ -199,6 +313,20 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
   }
 
   const handleEditDraft = (post: BlogPost) => {
+    setEditingPost(post)
+    setFormData({
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      author: post.author,
+      category: post.category,
+      thumbnail_url: post.thumbnail_url,
+      thumbnail_alt: post.thumbnail_alt
+    })
+    setActiveBlogSection("new-blog")
+  }
+
+  const handleEditPost = (post: BlogPost) => {
     setEditingPost(post)
     setFormData({
       title: post.title,
@@ -308,10 +436,16 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-dm-sans font-bold text-green-deep">
-                {editingPost ? 'Edit Draft' : 'Create New Blog Post'}
+                {editingPost 
+                  ? (editingPost.status === 'published' ? 'Edit Published Post' : 'Edit Draft')
+                  : 'Create New Blog Post'
+                }
               </h2>
               <p className="text-text-mid mt-1">
-                {editingPost ? 'Update your draft post' : 'Write and publish engaging health education content'}
+                {editingPost 
+                  ? (editingPost.status === 'published' ? 'Update your published post' : 'Update your draft post')
+                  : 'Write and publish engaging health education content'
+                }
               </p>
             </div>
             <div className="flex gap-3">
@@ -319,13 +453,16 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
                 onClick={handleSaveDraft}
                 className="px-4 py-2 bg-gold text-green-deep rounded-[12px] font-dm-sans font-semibold text-sm hover:bg-gold-light transition-colors shadow-sm"
               >
-                Save to Drafts
+                {editingPost?.status === 'published' ? 'Save as Draft' : 'Save to Drafts'}
               </button>
               <button
                 onClick={handleSubmit}
                 className="px-4 py-2 bg-green-deep text-white rounded-[12px] font-dm-sans font-semibold text-sm hover:bg-green-700 transition-colors shadow-sm"
               >
-                {editingPost ? 'Update Draft' : 'Publish Now'}
+                {editingPost 
+                  ? (editingPost.status === 'published' ? 'Update Published Post' : 'Update Draft')
+                  : 'Publish Now'
+                }
               </button>
             </div>
           </div>
@@ -390,16 +527,59 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
+                      disabled={uploadingImage}
+                      onChange={async (e) => {
                         const file = e.target.files?.[0]
                         if (file) {
-                          // For now, we'll create a local URL. In production, you'd upload to a server
-                          const imageUrl = URL.createObjectURL(file)
-                          setFormData({...formData, thumbnail_url: imageUrl})
+                          setUploadingImage(true)
+                          console.log('Starting image upload:', file.name, 'Size:', file.size)
+                          try {
+                            // Create FormData for server upload
+                            const uploadFormData = new FormData()
+                            uploadFormData.append('file', file)
+                            
+                            // Upload via server API route (bypasses RLS)
+                            const response = await fetch('/api/upload-image', {
+                              method: 'POST',
+                              body: uploadFormData,
+                            })
+                            
+                            console.log('Upload API response status:', response.status)
+                            
+                            if (!response.ok) {
+                              const errorData = await response.json()
+                              console.error('Upload API error:', errorData)
+                              setNotification({ message: `Upload failed: ${errorData.error || 'Unknown error'}`, type: 'error' })
+                              setTimeout(() => setNotification(null), 5000)
+                              return
+                            }
+                            
+                            const result = await response.json()
+                            console.log('Upload result:', result)
+                            
+                            if (result.success && result.url) {
+                              setFormData({...formData, thumbnail_url: result.url})
+                              setNotification({ message: 'Image uploaded successfully!', type: 'success' })
+                              setTimeout(() => setNotification(null), 3000)
+                            } else {
+                              console.error('Upload returned no URL')
+                              setNotification({ message: 'Error: Could not get image URL', type: 'error' })
+                              setTimeout(() => setNotification(null), 5000)
+                            }
+                          } catch (error: any) {
+                            console.error('Exception during upload:', error)
+                            setNotification({ message: `Error: ${error?.message || 'Upload failed'}`, type: 'error' })
+                            setTimeout(() => setNotification(null), 5000)
+                          } finally {
+                            setUploadingImage(false)
+                          }
                         }
                       }}
-                      className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-green-deep hover:file:bg-gold-light"
+                      className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-green-deep hover:file:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed"
                     />
+                    {uploadingImage && (
+                      <p className="text-sm text-green-mid font-dm-sans">Uploading image...</p>
+                    )}
                     <div>
                       <label className="block font-dm-sans font-medium text-green-deep mb-1 text-sm">Alt Text (for accessibility)</label>
                       <input
@@ -571,6 +751,12 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditPost(post)}
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded font-dm-sans hover:bg-blue-600 transition-colors"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => handleDelete(post)}
                         className="px-3 py-1 bg-red-500 text-white text-sm rounded font-dm-sans hover:bg-red-600 transition-colors"
