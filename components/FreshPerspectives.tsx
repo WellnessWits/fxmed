@@ -122,11 +122,12 @@ export default function FreshPerspectives() {
                     </div>
                   ))}
                 </>
-              ) : (
-                displayPosts.map((post, index) => (
+              ) : posts.length > 0 ? (
+                // Real posts from API
+                posts.map((post, index) => (
                   <Link 
                     key={post.id} 
-                    href={posts.length > 0 ? `/blog/${post.slug}` : '/blog'}
+                    href={`/blog/${post.slug}`}
                     className="block bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-start">
@@ -136,10 +137,34 @@ export default function FreshPerspectives() {
                           {post.title}
                         </h3>
                         <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
-                          {posts.length > 0 ? getExcerpt(post) : (post as any).excerpt}
+                          {getExcerpt(post)}
                         </p>
                         <div className="text-green-mid text-[0.85rem] font-medium">
-                          {posts.length > 0 ? getReadTime(post.content) : (post as any).readTime}
+                          {getReadTime(post.content)}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                // Default fallback posts
+                defaultPosts.map((post, index) => (
+                  <Link 
+                    key={post.id} 
+                    href="/blog"
+                    className="block bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start">
+                      <div className="text-2xl mr-4">{post.icon}</div>
+                      <div>
+                        <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2 hover:text-green-mid transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
+                          {post.excerpt}
+                        </p>
+                        <div className="text-green-mid text-[0.85rem] font-medium">
+                          {post.readTime}
                         </div>
                       </div>
                     </div>
