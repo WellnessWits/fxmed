@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import 'react-quill/dist/quill.snow.css'
+import AIGenerationPanel from './AIGenerationPanel'
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
@@ -407,6 +408,36 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
   const drafts = posts.filter(post => post.status === 'draft')
   const publishedPosts = posts.filter(post => post.status === 'published')
 
+  // Handle AI-generated content
+  const handleAIApply = (content: {
+    title: string
+    excerpt: string
+    content: string
+    category: string
+  }) => {
+    // Check if form already has content and confirm overwrite
+    const hasExistingContent = formData.title || formData.excerpt || formData.content
+    if (hasExistingContent) {
+      if (!confirm('This will overwrite the current content in the form. Continue?')) {
+        return
+      }
+    }
+
+    setFormData({
+      ...formData,
+      title: content.title,
+      excerpt: content.excerpt,
+      content: content.content,
+      category: content.category
+    })
+
+    setNotification({ 
+      message: 'AI-generated content applied! You can edit before publishing.', 
+      type: 'success' 
+    })
+    setTimeout(() => setNotification(null), 5000)
+  }
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -435,7 +466,14 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
       </div>
 
       {activeBlogSection === "new-blog" && (
-        <div className="bg-white rounded-[20px] p-6 shadow-lg">
+        <>
+          {/* AI Generation Panel */}
+          <AIGenerationPanel 
+            onApplyContent={handleAIApply}
+            currentCategory={formData.category}
+          />
+          
+          <div className="bg-white rounded-[20px] p-6 shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-2xl font-dm-sans font-bold text-green-deep">
@@ -655,6 +693,7 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
             </div>
           </form>
         </div>
+        </>
       )}
 
       {activeBlogSection === "drafts" && (
