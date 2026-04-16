@@ -21,8 +21,13 @@ interface BlogPost {
   updated_at: string
 }
 
-type Stage = "Outreach" | "Enrollment" | "Onboarding" | "Follow-Up" | "Active"
+type Stage = "Outreach" | "Follow Up" | "Enrolment" | "Onboarding" | "Active"
 type Risk = "High" | "Medium" | "Low"
+
+type Note = {
+  text: string
+  timestamp: string
+}
 
 type Patient = {
   id: string
@@ -45,6 +50,7 @@ type Patient = {
   consentStatus: string
   documentCount: number
   reminderStatus: string
+  notes?: Note[]
 }
 
 const patientsSeed: Patient[] = [
@@ -76,7 +82,7 @@ const patientsSeed: Patient[] = [
     age: 46,
     program: "Executive Concierge",
     risk: "Medium",
-    stage: "Enrollment",
+    stage: "Enrolment",
     source: "Website Lead",
     owner: "Maya",
     phone: "(832) 555-0127",
@@ -120,7 +126,7 @@ const patientsSeed: Patient[] = [
     age: 58,
     program: "Cardiometabolic Care",
     risk: "High",
-    stage: "Follow-Up",
+    stage: "Follow Up",
     source: "Hospital Partner",
     owner: "Ade",
     phone: "(346) 555-0141",
@@ -164,7 +170,7 @@ const patientsSeed: Patient[] = [
     age: 61,
     program: "Weight & Metabolic Reset",
     risk: "High",
-    stage: "Enrollment",
+    stage: "Enrolment",
     source: "Past Patient Referral",
     owner: "Ade",
     phone: "(832) 555-0193",

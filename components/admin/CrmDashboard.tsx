@@ -1,10 +1,32 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  useSensor,
+  useSensors,
+  useDroppable,
+  MouseSensor,
+  TouchSensor
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-type Stage = "Outreach" | "Enrollment" | "Onboarding" | "Follow-Up" | "Active"
+type Stage = "Outreach" | "Follow Up" | "Enrolment" | "Onboarding" | "Active"
 type NavItem = "overview" | "pipeline" | "coordinator" | "calendar" | "documents" | "reporting" | "ai-agent"
 type Risk = "High" | "Medium" | "Low"
+
+type Note = {
+  text: string
+  timestamp: string
+}
 
 type Patient = {
   id: string
@@ -27,6 +49,7 @@ type Patient = {
   consentStatus: string
   documentCount: number
   reminderStatus: string
+  notes?: Note[]
 }
 
 type Task = {
@@ -121,7 +144,7 @@ const patientsSeed: Patient[] = [
     age: 46,
     program: "Executive Concierge",
     risk: "Medium",
-    stage: "Enrollment",
+    stage: "Enrolment",
     source: "Website Lead",
     owner: "Maya",
     phone: "(832) 555-0127",
@@ -165,7 +188,7 @@ const patientsSeed: Patient[] = [
     age: 58,
     program: "Cardiometabolic Care",
     risk: "High",
-    stage: "Follow-Up",
+    stage: "Follow Up",
     source: "Hospital Partner",
     owner: "Ade",
     phone: "(346) 555-0141",
@@ -209,7 +232,7 @@ const patientsSeed: Patient[] = [
     age: 61,
     program: "Weight & Metabolic Reset",
     risk: "High",
-    stage: "Enrollment",
+    stage: "Enrolment",
     source: "Past Patient Referral",
     owner: "Ade",
     phone: "(832) 555-0193",
@@ -293,6 +316,50 @@ export default function CrmDashboard({
     { role: "assistant", text: "Welcome to FXMED CRM! I can help you manage patient outreach, track consent status, and optimize your enrollment pipeline. What would you like to focus on today?" }
   ])
 
+  // Drag and drop state
+  const [activeDragPatient, setActiveDragPatient] = useState<Patient | null>(null)
+
+  // Patient detail modal state
+  const [viewingPatient, setViewingPatient] = useState<Patient | null>(null)
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const [savingPatient, setSavingPatient] = useState(false)
+
+  // Handle edit patient
+  const handleEditPatient = (patient: Patient) => {
+    setEditingPatient(patient)
+  }
+
+  // Handle archive patient
+  const handleArchivePatient = async (patient: Patient) => {
+    try {
+      const response = await fetch('/api/crm', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: patient.id, status: 'archived' })
+      })
+      if (response.ok) {
+        setPatients(prev => prev.filter(p => p.id !== patient.id))
+      }
+    } catch (error) {
+      console.error('Error archiving patient:', error)
+    }
+  }
+
+  // Configure sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  )
+
   const navItems = [
     { id: "overview", label: "Overview", icon: "📊" },
     { id: "pipeline", label: "Pipeline", icon: "📈" },
@@ -303,7 +370,7 @@ export default function CrmDashboard({
     { id: "ai-agent", label: "AI Agent", icon: "🤖" },
   ]
 
-  const pipelineStages: Stage[] = ["Outreach", "Enrollment", "Onboarding", "Follow-Up", "Active"]
+  const pipelineStages: Stage[] = ["Outreach", "Follow Up", "Enrolment", "Onboarding", "Active"]
 
   // Move patient stage via API
   const movePatientStage = async (patient: Patient, direction: number) => {
@@ -342,6 +409,81 @@ export default function CrmDashboard({
     }
   }
 
+  // Move patient to specific stage (for drag-and-drop)
+  const movePatientToStage = async (patientId: string, newStage: Stage) => {
+    const patient = patients.find((p) => p.id === patientId)
+    if (!patient || patient.stage === newStage) return
+
+    try {
+      const response = await fetch('/api/crm', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: patientId,
+          stage: newStage,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API error:', errorData)
+        throw new Error(errorData.error || 'Failed to update patient stage')
+      }
+
+      const { patient: updatedPatient } = await response.json()
+      
+      // Update local state with the updated patient
+      setPatients((prev) => prev.map((p) => p.id === patientId ? updatedPatient : p))
+    } catch (error) {
+      console.error('Error updating patient stage:', error)
+      // Fallback to local state update if API fails
+      setPatients((prev) => prev.map((p) => 
+        p.id === patientId ? { ...p, stage: newStage } : p
+      ))
+    }
+  }
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    setActiveDragPatient(null)
+
+    if (!over) return
+
+    const patientId = active.id as string
+    const overId = over.id as string
+
+    // Check if dropped on a stage column directly
+    if (pipelineStages.includes(overId as Stage)) {
+      movePatientToStage(patientId, overId as Stage)
+      return
+    }
+
+    // Dropped on another patient, find their stage
+    const targetPatient = patients.find((p) => p.id === overId)
+    if (targetPatient) {
+      movePatientToStage(patientId, targetPatient.stage)
+      return
+    }
+
+    // Try to find stage from data attribute
+    const stageData = over.data?.current?.stage || over.data?.current?.sortable?.containerId
+    if (stageData && pipelineStages.includes(stageData as Stage)) {
+      movePatientToStage(patientId, stageData as Stage)
+    }
+  }
+
+  // Handle drag start
+  const handleDragStart = (event: DragStartEvent) => {
+    const patient = patients.find((p) => p.id === event.active.id)
+    if (patient) {
+      setActiveDragPatient(patient)
+    }
+  }
+
   // Filter patients based on search and filters
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
@@ -366,7 +508,7 @@ export default function CrmDashboard({
     const signedConsents = patients.filter((p) => p.consentStatus === "Signed").length
     const highRisk = patients.filter((p) => p.risk === "High").length
     const active = patients.filter((p) => p.stage === "Active").length
-    const enrollment = patients.filter((p) => p.stage === "Enrollment").length
+    const enrollment = patients.filter((p) => p.stage === "Enrolment").length
     const onboarding = patients.filter((p) => p.stage === "Onboarding").length
     return {
       total,
@@ -399,12 +541,192 @@ export default function CrmDashboard({
   const getStageColor = (stage: Stage) => {
     switch (stage) {
       case "Outreach": return "bg-yellow-100 text-yellow-800"
-      case "Enrollment": return "bg-blue-100 text-blue-800"
+      case "Follow Up": return "bg-orange-100 text-orange-800"
+      case "Enrolment": return "bg-blue-100 text-blue-800"
       case "Onboarding": return "bg-purple-100 text-purple-800"
-      case "Follow-Up": return "bg-green-100 text-green-800"
       case "Active": return "bg-emerald-100 text-emerald-800"
       default: return "bg-gray-100 text-gray-800"
     }
+  }
+
+  // Droppable Column Component
+  interface DroppableColumnProps {
+    stage: Stage
+    children: React.ReactNode
+    patientCount: number
+  }
+
+  const DroppableColumn = ({ stage, children, patientCount }: DroppableColumnProps) => {
+    const { isOver, setNodeRef } = useDroppable({
+      id: stage,
+      data: {
+        stage,
+        type: 'column'
+      }
+    })
+
+    return (
+      <div
+        ref={setNodeRef}
+        className={`bg-white rounded-[16px] p-6 shadow-sm border-2 min-h-[200px] transition-colors ${
+          isOver ? 'border-gold bg-gold/5' : 'border-green-deep/10'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-dm-sans font-semibold text-green-deep">{stage}</h3>
+          <span className={`px-2 py-1 rounded text-xs font-medium font-dm-sans ${getStageColor(stage)}`}>
+            {patientCount}
+          </span>
+        </div>
+        {children}
+      </div>
+    )
+  }
+
+  // Draggable Patient Card Component
+  interface DraggablePatientCardProps {
+    patient: Patient
+    onViewDetails: (patient: Patient) => void
+    onEdit?: (patient: Patient) => void
+    onArchive?: (patient: Patient) => void
+  }
+
+  const DraggablePatientCard = ({ patient, onViewDetails, onEdit, onArchive }: DraggablePatientCardProps) => {
+    const [showMenu, setShowMenu] = useState(false)
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging
+    } = useSortable({
+      id: patient.id,
+      data: {
+        patient,
+        stage: patient.stage,
+        type: 'patient'
+      }
+    })
+
+    // Close menu when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+          setShowMenu(false)
+        }
+      }
+      if (showMenu) {
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [showMenu])
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+      cursor: isDragging ? 'grabbing' : 'grab'
+    }
+
+    // Handle click to view details (only if not dragging and not clicking menu)
+    const handleClick = () => {
+      if (!isDragging && !showMenu) {
+        onViewDetails(patient)
+      }
+    }
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={handleClick}
+        className="border border-gray-200 rounded-lg p-3 bg-white hover:shadow-md transition-shadow cursor-pointer relative"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="font-medium font-dm-sans text-sm">{patient.name}</p>
+            <p className="text-xs text-gray-600 font-dm-sans">{patient.program}</p>
+          </div>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowMenu(!showMenu)
+              }}
+              className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+              </svg>
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-200 z-10 py-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowMenu(false)
+                    onViewDetails(patient)
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-dm-sans text-green-deep hover:bg-gray-50 transition-colors"
+                >
+                  View
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowMenu(false)
+                    onEdit?.(patient)
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-dm-sans text-green-deep hover:bg-gray-50 transition-colors"
+                >
+                  Edit
+                </button>
+                <div className="border-t border-gray-200 my-1" />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowMenu(false)
+                    if (confirm(`Archive ${patient.name}?`)) {
+                      onArchive?.(patient)
+                    }
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-dm-sans text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  Archive
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2 mt-2">
+          <button
+            className="text-xs bg-gray-100 px-2 py-1 rounded font-dm-sans"
+            disabled={patient.stage === pipelineStages[0]}
+            onClick={(e) => {
+              e.stopPropagation()
+              movePatientStage(patient, -1)
+            }}
+          >
+            ←
+          </button>
+          <button
+            className="text-xs bg-green-deep text-white px-2 py-1 rounded font-dm-sans"
+            disabled={patient.stage === pipelineStages[pipelineStages.length - 1]}
+            onClick={(e) => {
+              e.stopPropagation()
+              movePatientStage(patient, 1)
+            }}
+          >
+            →
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const getRiskColor = (risk: Risk) => {
@@ -441,20 +763,31 @@ export default function CrmDashboard({
   return (
     <div className="space-y-6">
       {/* CRM Navigation */}
-      <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg overflow-x-auto">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveSection(item.id as NavItem)}
-            className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors whitespace-nowrap ${
-              activeSection === item.id
-                ? 'bg-green-deep text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {item.icon} {item.label}
-          </button>
-        ))}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id as NavItem)}
+              className={`px-4 py-3 rounded-lg font-dm-sans text-[0.9rem] font-medium transition-colors whitespace-nowrap ${
+                activeSection === item.id
+                  ? 'bg-green-deep text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span className="mr-2">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* New Lead Button - Always Visible */}
+        <button
+          onClick={() => setShowLeadModal(true)}
+          className="px-4 py-3 bg-gold text-green-deep rounded-lg font-dm-sans font-semibold text-[0.9rem] hover:bg-gold-light transition-colors shadow-sm whitespace-nowrap"
+        >
+          + New Lead
+        </button>
       </div>
 
       {activeSection === "overview" && (
@@ -559,12 +892,6 @@ export default function CrmDashboard({
                 <h3 className="text-lg font-dm-sans font-semibold text-green-deep">Quick Actions</h3>
               </div>
               <div className="space-y-2">
-                <button
-                  onClick={() => setShowLeadModal(true)}
-                  className="w-full text-left px-4 py-3 bg-gold text-green-deep rounded-lg font-dm-sans font-semibold text-[0.9rem] hover:bg-gold-light transition-colors shadow-sm"
-                >
-                  + New Lead
-                </button>
                 <button className="w-full text-left px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-dm-sans text-[0.9rem] hover:bg-gray-200 transition-colors">
                   Generate Report
                 </button>
@@ -578,45 +905,45 @@ export default function CrmDashboard({
       )}
 
       {activeSection === "pipeline" && (
-        <div className="grid gap-6 lg:grid-cols-4">
-          {pipelineStages.map((stage) => {
-            const stagePatients = patients.filter((p) => p.stage === stage)
-            return (
-              <div key={stage} className="bg-white rounded-[16px] p-6 shadow-sm border border-green-deep/10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-dm-sans font-semibold text-green-deep">{stage}</h3>
-                  <span className={`px-2 py-1 rounded text-xs font-medium font-dm-sans ${getStageColor(stage)}`}>
-                    {stagePatients.length}
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {stagePatients.map((patient) => (
-                    <div key={patient.id} className="border border-gray-200 rounded-lg p-3">
-                      <p className="font-medium font-dm-sans text-sm">{patient.name}</p>
-                      <p className="text-xs text-gray-600 font-dm-sans">{patient.program}</p>
-                      <div className="flex gap-2 mt-2">
-                        <button
-                          className="text-xs bg-gray-100 px-2 py-1 rounded font-dm-sans"
-                          disabled={patient.stage === pipelineStages[0]}
-                          onClick={() => movePatientStage(patient, -1)}
-                        >
-                          ←
-                        </button>
-                        <button
-                          className="text-xs bg-green-deep text-white px-2 py-1 rounded font-dm-sans"
-                          disabled={patient.stage === pipelineStages[pipelineStages.length - 1]}
-                          onClick={() => movePatientStage(patient, 1)}
-                        >
-                          →
-                        </button>
-                      </div>
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid gap-6 lg:grid-cols-5">
+            {pipelineStages.map((stage) => {
+              const stagePatients = patients.filter((p) => p.stage === stage)
+              return (
+                <DroppableColumn key={stage} stage={stage} patientCount={stagePatients.length}>
+                  <SortableContext
+                    items={stagePatients.map(p => p.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-3">
+                      {stagePatients.map((patient) => (
+                        <DraggablePatientCard 
+                          key={patient.id} 
+                          patient={patient} 
+                          onViewDetails={setViewingPatient}
+                          onEdit={handleEditPatient}
+                          onArchive={handleArchivePatient}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DroppableColumn>
+              )
+            })}
+          </div>
+          <DragOverlay>
+            {activeDragPatient ? (
+              <div className="border border-gray-200 rounded-lg p-3 bg-white shadow-lg opacity-90 cursor-grabbing">
+                <p className="font-medium font-dm-sans text-sm">{activeDragPatient.name}</p>
+                <p className="text-xs text-gray-600 font-dm-sans">{activeDragPatient.program}</p>
               </div>
-            )
-          })}
-        </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {activeSection === "coordinator" && (
@@ -864,31 +1191,17 @@ export default function CrmDashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Owner</label>
-                  <select
-                    value={leadForm.owner}
-                    onChange={(e) => setLeadForm({...leadForm, owner: e.target.value})}
-                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                  >
-                    <option>Tola</option>
-                    <option>Ada</option>
-                    <option>Korede</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Risk Level</label>
-                  <select
-                    value={leadForm.risk}
-                    onChange={(e) => setLeadForm({...leadForm, risk: e.target.value as Risk})}
-                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                  >
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block font-dm-sans font-medium text-green-deep mb-1">Priority</label>
+                <select
+                  value={leadForm.risk}
+                  onChange={(e) => setLeadForm({...leadForm, risk: e.target.value as Risk})}
+                  className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                >
+                  <option value="High">High Priority</option>
+                  <option value="Medium">Medium Priority</option>
+                  <option value="Low">Low Priority</option>
+                </select>
               </div>
 
               <div className="flex items-center gap-2">
@@ -918,6 +1231,314 @@ export default function CrmDashboard({
               >
                 Create Lead
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient Detail Modal */}
+      {viewingPatient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[20px] p-6 shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-dm-sans font-bold text-green-deep">Patient Details</h3>
+              <button 
+                onClick={() => setViewingPatient(null)} 
+                className="text-gray-500 hover:text-gray-700 p-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Header Info */}
+              <div className="flex items-start gap-4 pb-6 border-b border-gray-200">
+                <div className="w-16 h-16 rounded-full bg-green-deep/10 flex items-center justify-center text-2xl">
+                  👤
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-dm-sans font-semibold text-green-deep">{viewingPatient.name}</h4>
+                  <p className="text-text-mid">{viewingPatient.program}</p>
+                  <div className="flex gap-2 mt-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStageColor(viewingPatient.stage)}`}>
+                      {viewingPatient.stage}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      viewingPatient.risk === 'High' ? 'bg-red-100 text-red-800' :
+                      viewingPatient.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-green-100 text-green-800'
+                    }`}>
+                      {viewingPatient.risk} Priority
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-dm-sans font-medium text-gray-600 mb-1">Phone</label>
+                  <p className="font-dm-sans text-green-deep">{viewingPatient.phone}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-dm-sans font-medium text-gray-600 mb-1">Email</label>
+                  <p className="font-dm-sans text-green-deep">{viewingPatient.email}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-dm-sans font-medium text-gray-600 mb-1">Age</label>
+                  <p className="font-dm-sans text-green-deep">{viewingPatient.age} years</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-dm-sans font-medium text-gray-600 mb-1">Source</label>
+                  <p className="font-dm-sans text-green-deep">{viewingPatient.source}</p>
+                </div>
+              </div>
+
+              {/* Status Info */}
+              <div className="bg-gray-50 rounded-[16px] p-4 space-y-3">
+                <h5 className="font-dm-sans font-semibold text-green-deep">Status</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-dm-sans text-gray-600">Consent Status</label>
+                    <p className="font-dm-sans text-sm text-green-deep">{viewingPatient.consentStatus}</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-dm-sans text-gray-600">Last Touch</label>
+                    <p className="font-dm-sans text-sm text-green-deep">{viewingPatient.lastTouch}</p>
+                  </div>
+                </div>
+
+                {/* Notes - Inside Status Section */}
+                <div className="pt-3 border-t border-gray-200">
+                  <label className="block text-xs font-dm-sans font-medium text-gray-600 mb-2">Notes</label>
+                  {viewingPatient.notes && viewingPatient.notes.length > 0 ? (
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {[...viewingPatient.notes].reverse().map((note, i) => (
+                        <div key={i} className="bg-yellow-50 rounded-lg p-2 border-l-4 border-gold">
+                          <p className="font-dm-sans text-sm text-green-deep">{note.text}</p>
+                          <p className="font-dm-sans text-xs text-gray-500 mt-1">
+                            {new Date(note.timestamp).toLocaleString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-dm-sans text-sm text-gray-400 italic">No notes yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Tags */}
+              {viewingPatient.tags && viewingPatient.tags.length > 0 && (
+                <div>
+                  <label className="block text-sm font-dm-sans font-medium text-gray-600 mb-2">Tags</label>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingPatient.tags.map((tag, i) => (
+                      <span key={i} className="px-2 py-1 bg-gold/20 text-green-deep rounded-full text-xs font-dm-sans">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setViewingPatient(null)}
+                  className="flex-1 px-4 py-2 rounded-lg border border-green-deep/20 font-dm-sans hover:bg-gray-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Patient Modal */}
+      {editingPatient && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[20px] p-6 shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-dm-sans font-bold text-green-deep">Edit Patient</h3>
+              <button 
+                onClick={() => setEditingPatient(null)} 
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block font-dm-sans font-medium text-green-deep mb-1">Name</label>
+                <input
+                  type="text"
+                  value={editingPatient.name}
+                  className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  onChange={(e) => setEditingPatient({...editingPatient, name: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={editingPatient.phone}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                    onChange={(e) => setEditingPatient({...editingPatient, phone: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editingPatient.email}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                    onChange={(e) => setEditingPatient({...editingPatient, email: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-dm-sans font-medium text-green-deep mb-1">Program</label>
+                <select
+                  value={editingPatient.program}
+                  onChange={(e) => setEditingPatient({...editingPatient, program: e.target.value})}
+                  className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                >
+                  <option>Cardiometabolic Care</option>
+                  <option>Hormonal Health</option>
+                  <option>Nutritional Medicine</option>
+                  <option>Preventive Care</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Stage</label>
+                  <select
+                    value={editingPatient.stage}
+                    onChange={(e) => setEditingPatient({...editingPatient, stage: e.target.value as Stage})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    {pipelineStages.map(stage => (
+                      <option key={stage} value={stage}>{stage}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-dm-sans font-medium text-green-deep mb-1">Priority</label>
+                  <select
+                    value={editingPatient.risk}
+                    onChange={(e) => setEditingPatient({...editingPatient, risk: e.target.value as Risk})}
+                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  >
+                    <option value="High">High Priority</option>
+                    <option value="Medium">Medium Priority</option>
+                    <option value="Low">Low Priority</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-dm-sans font-medium text-green-deep mb-1">Add Note</label>
+                <textarea
+                  value={editingPatient.note || ''}
+                  placeholder="Add a note about this patient..."
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
+                  onChange={(e) => setEditingPatient({...editingPatient, note: e.target.value})}
+                />
+                <p className="text-xs text-gray-500 mt-1">This note will be saved with the current date and time.</p>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setEditingPatient(null)}
+                  disabled={savingPatient}
+                  className="flex-1 px-4 py-2 rounded-lg border border-green-deep/20 font-dm-sans hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setSavingPatient(true)
+                    try {
+                      // Build updated patient with new note
+                      const updatedPatientData = {
+                        ...editingPatient,
+                        name: editingPatient.name,
+                        phone: editingPatient.phone,
+                        email: editingPatient.email,
+                        program: editingPatient.program,
+                        stage: editingPatient.stage,
+                        risk: editingPatient.risk,
+                      }
+                      
+                      // Add note if provided
+                      if (editingPatient.note && editingPatient.note.trim()) {
+                        const newNote = {
+                          text: editingPatient.note.trim(),
+                          timestamp: new Date().toISOString()
+                        }
+                        updatedPatientData.notes = [
+                          ...(editingPatient.notes || []),
+                          newNote
+                        ]
+                        // Clear the note field
+                        delete updatedPatientData.note
+                      }
+
+                      const response = await fetch('/api/crm', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedPatientData)
+                      })
+                      
+                      if (response.ok) {
+                        const data = await response.json()
+                        const updatedPatient = data.patient || data
+                        setPatients(prev => prev.map(p => p.id === updatedPatient.id ? updatedPatient : p))
+                        setEditingPatient(null)
+                      } else {
+                        // API failed, update locally as fallback
+                        const errorText = await response.text()
+                        console.error('API error:', errorText)
+                        setPatients(prev => prev.map(p => p.id === editingPatient.id ? updatedPatientData : p))
+                        setEditingPatient(null)
+                      }
+                    } catch (error) {
+                      console.error('Error updating patient:', error)
+                      // Fallback: update locally even if API fails
+                      const fallbackData = {
+                        ...editingPatient,
+                        notes: editingPatient.note ? [
+                          ...(editingPatient.notes || []),
+                          { text: editingPatient.note, timestamp: new Date().toISOString() }
+                        ] : editingPatient.notes
+                      }
+                      delete fallbackData.note
+                      setPatients(prev => prev.map(p => p.id === editingPatient.id ? fallbackData : p))
+                      setEditingPatient(null)
+                    } finally {
+                      setSavingPatient(false)
+                    }
+                  }}
+                  disabled={savingPatient}
+                  className="flex-1 px-4 py-2 rounded-lg bg-green-deep text-white font-dm-sans hover:bg-green-700 disabled:opacity-50"
+                >
+                  {savingPatient ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
