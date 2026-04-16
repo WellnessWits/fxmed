@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import ReactQuill from 'react-quill'
+import dynamic from 'next/dynamic'
 import 'react-quill/dist/quill.snow.css'
+
+// Dynamically import ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 
 interface BlogPost {
   id: string
