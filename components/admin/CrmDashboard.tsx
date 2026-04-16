@@ -50,6 +50,7 @@ type Patient = {
   documentCount: number
   reminderStatus: string
   notes?: Note[]
+  note?: string // Temporary field for edit modal
 }
 
 type Task = {
