@@ -27,7 +27,7 @@ export default function VideoSection() {
             <div className="relative rounded-[20px] overflow-hidden shadow-2xl bg-black/20 aspect-video">
               <iframe 
                 className="w-full h-full rounded-[20px]"
-                src="https://www.youtube.com/watch?v=81dH7g08_p0"
+                src="https://www.youtube.com/embed/EciXbeQd9So"
                 title="FXMed Featured Video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

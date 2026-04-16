@@ -1,6 +1,93 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+
+type BlogPost = {
+  id: string
+  title: string
+  excerpt: string | null
+  content: string
+  status: 'draft' | 'published'
+  created_at: string
+  updated_at: string
+  slug: string
+}
+
+const defaultPosts = [
+  {
+    id: '1',
+    title: 'Understanding Your Lab Results',
+    excerpt: 'Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.',
+    icon: '🩺',
+    readTime: '5 min read',
+    slug: 'understanding-lab-results'
+  },
+  {
+    id: '2',
+    title: 'Preventive Care Strategies',
+    excerpt: 'Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.',
+    icon: '💊',
+    readTime: '8 min read',
+    slug: 'preventive-care-strategies'
+  },
+  {
+    id: '3',
+    title: 'Nutrition for Mental Wellness',
+    excerpt: 'Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.',
+    icon: '🧠',
+    readTime: '6 min read',
+    slug: 'nutrition-mental-wellness'
+  }
+]
+
 export default function FreshPerspectives() {
+  const [posts, setPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/blog?limit=3&status=published')
+        if (!response.ok) throw new Error('Failed to fetch posts')
+        
+        const data = await response.json()
+        if (data.posts && data.posts.length > 0) {
+          setPosts(data.posts.slice(0, 3))
+        }
+      } catch (err) {
+        console.error('Error fetching posts:', err)
+        setError('Failed to load latest articles')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  const getReadTime = (content: string) => {
+    const wordsPerMinute = 200
+    const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length
+    const minutes = Math.ceil(words / wordsPerMinute)
+    return `${minutes} min read`
+  }
+
+  const getExcerpt = (post: BlogPost) => {
+    if (post.excerpt) return post.excerpt
+    // Strip HTML tags and get first 150 characters
+    const text = post.content.replace(/<[^>]*>/g, '')
+    return text.substring(0, 150) + (text.length > 150 ? '...' : '')
+  }
+
+  const getIcon = (index: number) => {
+    const icons = ['🩺', '💊', '🧠', '🌿', '💪', '🥗']
+    return icons[index % icons.length]
+  }
+
+  const displayPosts = posts.length > 0 ? posts : defaultPosts
+
   return (
     <section id="fresh-perspectives" className="bg-[#FCFFF0] py-[90px] px-[5%]">
       <div className="max-w-7xl mx-auto">
@@ -19,62 +106,52 @@ export default function FreshPerspectives() {
 
             {/* Blog Posts */}
             <div className="space-y-6 mb-8">
-              <div className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <div className="text-2xl mr-4">🩺</div>
-                  <div>
-                    <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
-                      Understanding Your Lab Results
-                    </h3>
-                    <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
-                      Learn how to interpret your blood work and make informed health decisions based on evidence-based medicine.
-                    </p>
-                    <div className="text-green-mid text-[0.85rem] font-medium">
-                      5 min read
+              {loading ? (
+                // Loading state
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm animate-pulse">
+                      <div className="flex items-start">
+                        <div className="w-8 h-8 bg-gray-200 rounded mr-4"></div>
+                        <div className="flex-1">
+                          <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <div className="text-2xl mr-4">💊</div>
-                  <div>
-                    <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
-                      Preventive Care Strategies
-                    </h3>
-                    <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
-                      Discover proactive approaches to maintain optimal health and prevent chronic conditions before they develop.
-                    </p>
-                    <div className="text-green-mid text-[0.85rem] font-medium">
-                      8 min read
+                  ))}
+                </>
+              ) : (
+                displayPosts.map((post, index) => (
+                  <Link 
+                    key={post.id} 
+                    href={posts.length > 0 ? `/blog/${post.slug}` : '/blog'}
+                    className="block bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start">
+                      <div className="text-2xl mr-4">{getIcon(index)}</div>
+                      <div>
+                        <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2 hover:text-green-mid transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
+                          {posts.length > 0 ? getExcerpt(post) : (post as any).excerpt}
+                        </p>
+                        <div className="text-green-mid text-[0.85rem] font-medium">
+                          {posts.length > 0 ? getReadTime(post.content) : (post as any).readTime}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-[16px] p-6 border border-green-deep/8 shadow-sm">
-                <div className="flex items-start mb-4">
-                  <div className="text-2xl mr-4">🧠</div>
-                  <div>
-                    <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">
-                      Nutrition for Mental Wellness
-                    </h3>
-                    <p className="font-dm-sans text-text-mid text-[0.9rem] leading-[1.6] mb-2">
-                      Explore the connection between diet and mental health, with practical tips for improving both through functional nutrition.
-                    </p>
-                    <div className="text-green-mid text-[0.85rem] font-medium">
-                      6 min read
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </Link>
+                ))
+              )}
             </div>
 
             {/* CTA Button */}
-            <a href="/blog" className="font-dm-sans bg-gold text-green-deep px-8 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block">
+            <Link href="/blog" className="font-dm-sans bg-gold text-green-deep px-8 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block">
               Read All Articles →
-            </a>
+            </Link>
           </div>
 
           {/* Right Content - Image Placeholder */}
