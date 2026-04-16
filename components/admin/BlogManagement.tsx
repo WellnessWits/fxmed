@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 
 interface BlogPost {
   id: string
@@ -11,6 +13,7 @@ interface BlogPost {
   author: string
   category: string
   thumbnail_url: string
+  thumbnail_alt?: string
   status: 'draft' | 'published'
   read_time: string
   created_at: string
@@ -32,9 +35,11 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
     content: '',
     author: 'FXMed Team',
     category: 'Health Education',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    thumbnail_alt: ''
   })
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const blogNavItems = [
     { id: "new-blog", label: "New Blog" },
@@ -48,6 +53,38 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
     const words = plainText.split(/\s+/).length
     const minutes = Math.ceil(words / 200)
     return `${minutes} min read`
+  }
+
+  // Toast notification component
+  const ToastNotification = ({ notification, onClose }: { notification: { message: string; type: 'success' | 'error' }, onClose: () => void }) => {
+    if (!notification) return null
+
+    return (
+      <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all transform ${
+        notification.type === 'success' 
+          ? 'bg-green-deep text-white' 
+          : 'bg-red-500 text-white'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="mr-2">
+              {notification.type === 'success' ? '✓' : '✗'}
+            </span>
+            <span className="font-dm-sans font-medium">
+              {notification.message}
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:opacity-80 transition-opacity"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,13 +129,16 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
         content: '',
         author: 'FXMed Team',
         category: 'Health Education',
-        thumbnail_url: ''
+        thumbnail_url: '',
+        thumbnail_alt: ''
       })
 
-      alert('Blog post created successfully!')
+      setNotification({ message: 'Blog post created successfully!', type: 'success' })
+      setTimeout(() => setNotification(null), 3000)
     } catch (error) {
       console.error('Error creating post:', error)
-      alert('Error creating blog post. Please try again.')
+      setNotification({ message: 'Error creating blog post. Please try again.', type: 'error' })
+      setTimeout(() => setNotification(null), 5000)
     }
   }
 
@@ -115,6 +155,7 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
       author: formData.author || 'FXMed Team',
       category: formData.category || 'Health Education',
       thumbnail_url: formData.thumbnail_url || '',
+      thumbnail_alt: formData.thumbnail_alt || '',
       status: 'draft' as const,
       read_time: calculateReadTime(formData.content || '')
     }
@@ -144,13 +185,16 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
         content: '',
         author: 'FXMed Team',
         category: 'Health Education',
-        thumbnail_url: ''
+        thumbnail_url: '',
+        thumbnail_alt: ''
       })
 
-      alert('Draft saved successfully!')
+      setNotification({ message: 'Draft saved successfully!', type: 'success' })
+      setTimeout(() => setNotification(null), 3000)
     } catch (error) {
       console.error('Error saving draft:', error)
-      alert('Error saving draft. Please try again.')
+      setNotification({ message: 'Error saving draft. Please try again.', type: 'error' })
+      setTimeout(() => setNotification(null), 5000)
     }
   }
 
@@ -162,7 +206,8 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
       content: post.content,
       author: post.author,
       category: post.category,
-      thumbnail_url: post.thumbnail_url
+      thumbnail_url: post.thumbnail_url,
+      thumbnail_alt: post.thumbnail_alt
     })
     setActiveBlogSection("new-blog")
   }
@@ -181,10 +226,21 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
 
       const { post: updatedPost } = await response.json()
       setPosts(posts.map(p => p.id === post.id ? updatedPost : p))
-      alert('Draft published successfully!')
+      setFormData({
+        title: '',
+        excerpt: '',
+        content: '',
+        author: 'FXMed Team',
+        category: 'Health Education',
+        thumbnail_url: '',
+        thumbnail_alt: ''
+      })
+      setNotification({ message: 'Draft published successfully!', type: 'success' })
+      setTimeout(() => setNotification(null), 3000)
     } catch (error) {
       console.error('Error publishing draft:', error)
-      alert('Error publishing draft. Please try again.')
+      setNotification({ message: 'Error publishing draft. Please try again.', type: 'error' })
+      setTimeout(() => setNotification(null), 5000)
     }
   }
 
@@ -199,10 +255,21 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
       if (!response.ok) throw new Error('Failed to delete post')
 
       setPosts(posts.filter(p => p.id !== post.id))
-      alert('Post deleted successfully!')
+      setFormData({
+        title: '',
+        excerpt: '',
+        content: '',
+        author: 'FXMed Team',
+        category: 'Health Education',
+        thumbnail_url: '',
+        thumbnail_alt: ''
+      })
+      setNotification({ message: 'Post deleted successfully!', type: 'success' })
+      setTimeout(() => setNotification(null), 3000)
     } catch (error) {
       console.error('Error deleting post:', error)
-      alert('Error deleting post. Please try again.')
+      setNotification({ message: 'Error deleting post. Please try again.', type: 'error' })
+      setTimeout(() => setNotification(null), 5000)
     }
   }
 
@@ -211,6 +278,14 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {notification && (
+        <ToastNotification 
+          notification={notification} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
+      
       {/* Blog Navigation */}
       <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
         {blogNavItems.map((item) => (
@@ -295,17 +370,6 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
                     <option>Fitness</option>
                   </select>
                 </div>
-
-                <div>
-                  <label className="block font-dm-sans font-medium text-green-deep mb-2">Thumbnail URL</label>
-                  <input
-                    type="url"
-                    value={formData.thumbnail_url || ''}
-                    onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
-                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
               </div>
 
               <div className="space-y-4">
@@ -321,17 +385,90 @@ export default function BlogManagement({ posts, setPosts }: BlogManagementProps)
                 </div>
 
                 <div>
-                  <label className="block font-dm-sans font-medium text-green-deep mb-2">Content</label>
-                  <textarea
-                    value={formData.content || ''}
-                    onChange={(e) => setFormData({...formData, content: e.target.value})}
-                    rows={10}
-                    className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                    placeholder="Write your blog post content here..."
-                    required
-                  />
+                  <label className="block font-dm-sans font-medium text-green-deep mb-2">Thumbnail Image</label>
+                  <div className="space-y-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          // For now, we'll create a local URL. In production, you'd upload to a server
+                          const imageUrl = URL.createObjectURL(file)
+                          setFormData({...formData, thumbnail_url: imageUrl})
+                        }
+                      }}
+                      className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gold file:text-green-deep hover:file:bg-gold-light"
+                    />
+                    <div>
+                      <label className="block font-dm-sans font-medium text-green-deep mb-1 text-sm">Alt Text (for accessibility)</label>
+                      <input
+                        type="text"
+                        value={formData.thumbnail_alt || ''}
+                        onChange={(e) => setFormData({...formData, thumbnail_alt: e.target.value})}
+                        className="w-full px-3 py-2 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold text-sm"
+                        placeholder="Describe the image for screen readers (e.g., 'Doctor consulting with patient in modern clinic')"
+                      />
+                      <p className="text-xs text-gray-500 mt-1 font-dm-sans">
+                        Alt text helps visually impaired users understand the image content
+                      </p>
+                    </div>
+                    {formData.thumbnail_url && (
+                      <div className="mt-2">
+                        <img 
+                          src={formData.thumbnail_url} 
+                          alt={formData.thumbnail_alt || "Thumbnail preview"} 
+                          className="w-full h-32 object-cover rounded-lg border border-green-deep/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, thumbnail_url: '', thumbnail_alt: ''})}
+                          className="mt-2 text-sm text-red-600 hover:text-red-800 font-dm-sans"
+                        >
+                          Remove image
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Content Field - Full Width */}
+            <div className="mt-6">
+              <label className="block font-dm-sans font-medium text-green-deep mb-2">Content</label>
+              <div className="border border-green-deep/20 rounded-lg overflow-hidden">
+                <ReactQuill
+                  value={formData.content || ''}
+                  onChange={(content) => setFormData({...formData, content})}
+                  placeholder="Write your blog post content here..."
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      ['blockquote', 'code-block'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      [{ 'script': 'sub'}, { 'script': 'super' }],
+                      [{ 'indent': '-1'}, { 'indent': '+1' }],
+                      [{ 'color': [] }, { 'background': [] }],
+                      [{ 'align': [] }],
+                      ['link', 'image'],
+                      ['clean']
+                    ]
+                  }}
+                  formats={[
+                    'header', 'bold', 'italic', 'underline', 'strike',
+                    'blockquote', 'code-block', 'list', 'bullet',
+                    'script', 'indent', 'color', 'background', 'align',
+                    'link', 'image'
+                  ]}
+                  theme="snow"
+                  style={{ height: '300px' }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-8 font-dm-sans">
+                Use the toolbar to format your content with headings, bold, italics, lists, links, images, and more.
+              </p>
             </div>
           </form>
         </div>

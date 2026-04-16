@@ -60,7 +60,7 @@ export default function Pricing() {
 
         {/* Concierge Packages Content */}
         {activeTab === 'concierge' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             {/* Standard Plan */}
             <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
               <div className="mb-6">
@@ -71,6 +71,9 @@ export default function Pricing() {
                 <div className="mb-4">
                   <span className="font-dm-sans text-text-mid text-[0.9rem]">per month</span>
                 </div>
+                <div className="mb-4">
+                  <span className="font-dm-sans text-black text-[0.8rem] font-medium">Minimum 3 months subscription</span>
+                </div>
               </div>
               
               <ul className="space-y-3 mb-8">
@@ -78,6 +81,38 @@ export default function Pricing() {
                   <span className="text-green-mid mr-3 mt-1">✓</span>
                   <span className="font-dm-sans text-text-mid text-[0.95rem]">Quarterly house call / visit</span>
                 </li>
+                <li className="flex items-start">
+                  <span className="text-green-mid mr-3 mt-1">✓</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">2 tele-consults per month</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-mid mr-3 mt-1">✓</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Open-slot booking</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-mid mr-3 mt-1">✓</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Personalized care plan</span>
+                </li>
+              </ul>
+              
+              <a href="#contact" className="w-full block text-center bg-green-deep text-cream px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] no-underline transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px]">
+                Get Started
+              </a>
+            </div>
+
+            {/* Basic Plan */}
+            <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
+              <div className="mb-6">
+                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Basic</h3>
+                <div className="mb-4">
+                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦80,000</span>
+                </div>
+                <div className="mb-4">
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">one month assessment</span>
+                </div>
+              </div>
+              
+              <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
                   <span className="font-dm-sans text-text-mid text-[0.95rem]">2 tele-consults per month</span>

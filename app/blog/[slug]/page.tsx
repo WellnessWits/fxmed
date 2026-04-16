@@ -531,24 +531,10 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
 
               {/* Article Content */}
               <div className="bg-white rounded-[20px] p-8 shadow-lg">
-                <div className="prose prose-lg max-w-none">
-                  {post.content.split('\n').map((paragraph: string, index: number) => {
-                    if (paragraph.startsWith('# ')) {
-                      return <h1 key={index} className="font-dm-sans font-bold text-green-deep text-[2rem] mb-4">{paragraph.slice(2)}</h1>
-                    } else if (paragraph.startsWith('## ')) {
-                      return <h2 key={index} className="font-dm-sans font-bold text-green-deep text-[1.5rem] mb-3 mt-6">{paragraph.slice(3)}</h2>
-                    } else if (paragraph.startsWith('### ')) {
-                      return <h3 key={index} className="font-dm-sans font-bold text-green-deep text-[1.2rem] mb-2 mt-4">{paragraph.slice(4)}</h3>
-                    } else if (paragraph.startsWith('- ')) {
-                      return <li key={index} className="font-dm-sans text-text-mid mb-1">{paragraph.slice(2)}</li>
-                    } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                      return <p key={index} className="font-dm-sans font-semibold text-green-deep mb-4">{paragraph.slice(2, -2)}</p>
-                    } else if (paragraph.trim()) {
-                      return <p key={index} className="font-dm-sans text-text-mid leading-[1.7] mb-4">{paragraph}</p>
-                    }
-                    return null
-                  })}
-                </div>
+                <div 
+                  className="prose prose-lg max-w-none font-dm-sans text-text-mid leading-[1.7]"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
               </div>
 
               {/* Article Footer */}

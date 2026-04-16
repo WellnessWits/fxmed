@@ -79,11 +79,11 @@ export default function Hero() {
         </p>
         
         {/* Actions */}
-        <div className="flex gap-4 flex-wrap justify-center animate-fade-in-up">
-          <a href="#quiz" className="font-dm-sans bg-gold text-green-deep px-9 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block">
-            Start Health Assessment
+        <div className="flex flex-col gap-4 items-center animate-fade-in-up max-w-sm mx-auto">
+          <a href="/functional-health-analysis" className="font-dm-sans bg-gold text-green-deep px-6 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block text-center w-full whitespace-nowrap">
+            Take Functional Health Assessment
           </a>
-          <a href="#programs" className="font-dm-sans bg-transparent text-cream px-9 py-[15px] rounded-[50px] font-medium text-[1rem] no-underline border border-cream/40 transition-all hover:border-cream hover:bg-cream/8 inline-block">
+          <a href="#programs" className="font-dm-sans bg-transparent text-cream px-9 py-[15px] rounded-[50px] font-medium text-[1rem] no-underline border border-cream/40 transition-all hover:border-cream hover:bg-cream/8 inline-block text-center w-full">
             View Programs
           </a>
         </div>

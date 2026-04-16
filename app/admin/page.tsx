@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import BlogManagement from '@/components/admin/BlogManagement'
 import CrmDashboard from '@/components/admin/CrmDashboard'
 import SeoAnalytics from '@/components/admin/SeoAnalytics'
+import FunctionalHealthAnalysis from '@/components/admin/FunctionalHealthAnalysis'
 
 interface BlogPost {
   id: string
@@ -184,7 +185,7 @@ const patientsSeed: Patient[] = [
 export default function AdminPanel() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'blog' | 'crm' | 'seo'>('blog')
+  const [activeTab, setActiveTab] = useState<'blog' | 'crm' | 'seo' | 'health'>('blog')
 
   // CRM state
   const [patients, setPatients] = useState<Patient[]>(patientsSeed)
@@ -375,6 +376,17 @@ export default function AdminPanel() {
                 <span>📈</span>
                 <span>SEO Analytics</span>
               </button>
+              <button
+                onClick={() => setActiveTab('health')}
+                className={`w-full px-4 py-3 rounded-lg font-dm-sans text-sm font-medium transition-all text-left flex items-center space-x-3 ${
+                  activeTab === 'health'
+                    ? 'bg-gold text-green-deep shadow-md'
+                    : 'text-cream/85 hover:bg-green-deep/20 hover:text-cream'
+                }`}
+              >
+                <span>🏥</span>
+                <span>Health Analysis</span>
+              </button>
             </div>
           </nav>
         </div>
@@ -388,11 +400,13 @@ export default function AdminPanel() {
                 {activeTab === 'blog' && 'Blog Management'}
                 {activeTab === 'crm' && 'CRM Dashboard'}
                 {activeTab === 'seo' && 'SEO Analytics'}
+                {activeTab === 'health' && 'Functional Health Analysis'}
               </h2>
               <p className="text-text-mid">
                 {activeTab === 'blog' && 'Manage your blog posts, drafts, and content'}
                 {activeTab === 'crm' && 'Track patients, manage pipeline, and optimize outreach'}
                 {activeTab === 'seo' && 'Monitor search performance and optimize content'}
+                {activeTab === 'health' && 'Review and manage health assessment submissions'}
               </p>
             </div>
 
@@ -414,6 +428,8 @@ export default function AdminPanel() {
             )}
 
             {activeTab === 'seo' && <SeoAnalytics />}
+
+            {activeTab === 'health' && <FunctionalHealthAnalysis />}
           </div>
         </div>
       </div>

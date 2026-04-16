@@ -236,9 +236,13 @@ export default function BlogPage() {
                       {post.title}
                     </h3>
 
-                    <p className="font-dm-sans text-text-mid text-[0.95rem] leading-[1.6] mb-4 line-clamp-3">
-                      {post.excerpt}
-                    </p>
+                    <p className="font-dm-sans text-text-mid text-[0.95rem] leading-[1.6] mb-4 line-clamp-3"
+                      dangerouslySetInnerHTML={{ 
+                        __html: post.excerpt.length > 150 
+                          ? post.excerpt.substring(0, 150) + '...' 
+                          : post.excerpt 
+                      }}
+                    />
 
                     <div className="flex items-center justify-between">
                       <span className="text-text-mid text-[0.9rem] font-medium">

@@ -132,7 +132,16 @@ export default function HealthQuiz() {
     const result = getResult()
     
     return (
-      <div className="max-w-[760px] mx-auto mt-12 bg-gradient-to-br from-green-deep to-[#1e4a35] border border-gold/20 rounded-[24px] p-12 text-center">
+      <div className="max-w-[760px] mx-auto mt-12 bg-gradient-to-br from-green-deep to-[#1e4a35] border border-gold/20 rounded-[24px] p-12 text-center relative">
+        <button
+          onClick={resetQuiz}
+          className="absolute top-4 right-4 bg-transparent text-cream/60 hover:text-gold-light transition-colors p-2 rounded-lg hover:bg-cream/10"
+          title="Retake Quiz"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
         <div className="inline-block bg-gold/20 border border-gold text-gold-light px-6 py-2 rounded-[30px] text-[0.85rem] font-dm-sans mb-5">
           Your Personalized Health Plan
         </div>
@@ -147,13 +156,17 @@ export default function HealthQuiz() {
             {result.program}
           </span>
         </div>
+        <p className="font-dm-sans text-cream text-[1.1rem] leading-[1.6] mb-6">
+          Want to know what is wrong and what to do?<br/>
+          Take a deep dive into your health status
+        </p>
         <div className="flex gap-4 justify-center">
-          <a href="#contact" className="bg-gold text-green-deep px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans no-underline transition-all hover:bg-gold-light inline-block">
-            Book Free Discovery Call
+          <a href="/functional-health-analysis" className="bg-gold text-green-deep px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans no-underline transition-all hover:bg-gold-light inline-block">
+            Take a Functional Health Analysis
           </a>
-          <button onClick={resetQuiz} className="bg-transparent text-cream border border-cream/30 px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans transition-all hover:border-cream hover:bg-cream/8">
-            Retake Quiz
-          </button>
+          <a href="#contact" className="bg-transparent text-cream border border-cream/30 px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans transition-all hover:border-cream hover:bg-cream/8 no-underline">
+            Book an Appointment
+          </a>
         </div>
       </div>
     )

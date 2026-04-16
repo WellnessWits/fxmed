@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import MaternalWellnessModal, { useMaternalWellnessModal } from './MaternalWellnessModal'
+
 const programs = [
   {
     icon: <img src="/healthicons_thyroid-24px.svg" alt="Thyroid" className="w-8 h-8" />,
@@ -83,6 +86,8 @@ const services = [
 ]
 
 export default function Programs() {
+  const { isOpen, selectedPackage, openModal, closeModal } = useMaternalWellnessModal()
+
   return (
     <>
       {/* Programs Section */}
@@ -184,7 +189,10 @@ export default function Programs() {
 
               {/* Packages */}
               <div className="space-y-4">
-                <div className="bg-white rounded-[16px] p-6 border border-green-deep/8">
+                <div 
+                  className="bg-white rounded-[16px] p-6 border border-green-deep/8 cursor-pointer transition-all hover:shadow-lg hover:border-green-mid"
+                  onClick={() => openModal(0)}
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-1">Pre-Conception Package</h3>
@@ -192,11 +200,15 @@ export default function Programs() {
                     </div>
                     <div className="text-right">
                       <div className="font-dm-sans font-bold text-green-mid text-[1.2rem]">₦295,000</div>
+                      <div className="font-dm-sans text-text-mid text-[0.85rem]">$197</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-[16px] p-6 border border-green-deep/8">
+                <div 
+                  className="bg-white rounded-[16px] p-6 border border-green-deep/8 cursor-pointer transition-all hover:shadow-lg hover:border-green-mid"
+                  onClick={() => openModal(1)}
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-1">Ante-Natal Package</h3>
@@ -204,22 +216,30 @@ export default function Programs() {
                     </div>
                     <div className="text-right">
                       <div className="font-dm-sans font-bold text-green-mid text-[1.2rem]">₦740,000</div>
+                      <div className="font-dm-sans text-text-mid text-[0.85rem]">$527</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-[16px] p-6 border border-green-deep/8">
+                <div 
+                  className="bg-white rounded-[16px] p-6 border border-green-deep/8 cursor-pointer transition-all hover:shadow-lg hover:border-green-mid"
+                  onClick={() => openModal(2)}
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-1">Post-Natal Recovery</h3>
                     </div>
                     <div className="text-right">
                       <div className="font-dm-sans font-bold text-green-mid text-[1.2rem]">₦395,000</div>
+                      <div className="font-dm-sans text-text-mid text-[0.85rem]">$271</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-[16px] p-6 border border-green-deep/8">
+                <div 
+                  className="bg-white rounded-[16px] p-6 border border-green-deep/8 cursor-pointer transition-all hover:shadow-lg hover:border-green-mid"
+                  onClick={() => openModal(3)}
+                >
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-1">Fertility Breakthrough Program</h3>
@@ -260,6 +280,13 @@ export default function Programs() {
           </div>
         </div>
       </section>
+
+      {/* Maternal Wellness Modal */}
+      <MaternalWellnessModal 
+        isOpen={isOpen} 
+        onClose={closeModal} 
+        selectedPackage={selectedPackage}
+      />
     </>
   )
 }
