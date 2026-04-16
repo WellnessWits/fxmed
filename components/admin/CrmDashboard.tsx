@@ -325,6 +325,19 @@ export default function CrmDashboard({
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
   const [savingPatient, setSavingPatient] = useState(false)
 
+  // Save notes to localStorage (backup until DB migration is applied)
+  const saveNotesToStorage = (patientId: string, notes: Note[]) => {
+    if (typeof window === 'undefined') return
+    try {
+      const saved = localStorage.getItem('crm-patient-notes')
+      const allNotes = saved ? JSON.parse(saved) : {}
+      allNotes[patientId] = notes
+      localStorage.setItem('crm-patient-notes', JSON.stringify(allNotes))
+    } catch (e) {
+      console.error('Error saving notes to localStorage:', e)
+    }
+  }
+
   // Handle edit patient
   const handleEditPatient = (patient: Patient) => {
     setEditingPatient(patient)
@@ -1508,12 +1521,20 @@ export default function CrmDashboard({
                       if (response.ok) {
                         const data = await response.json()
                         const updatedPatient = data.patient || data
-                        setPatients(prev => prev.map(p => p.id === updatedPatient.id ? updatedPatient : p))
+                        // Save notes to localStorage as backup
+                        if (updatedPatientData.notes) {
+                          saveNotesToStorage(updatedPatient.id, updatedPatientData.notes)
+                        }
+                        setPatients(prev => prev.map(p => p.id === updatedPatient.id ? {...updatedPatient, notes: updatedPatientData.notes} : p))
                         setEditingPatient(null)
                       } else {
                         // API failed, update locally as fallback
                         const errorText = await response.text()
                         console.error('API error:', errorText)
+                        // Save notes to localStorage even if API fails
+                        if (updatedPatientData.notes) {
+                          saveNotesToStorage(editingPatient.id, updatedPatientData.notes)
+                        }
                         setPatients(prev => prev.map(p => p.id === editingPatient.id ? updatedPatientData : p))
                         setEditingPatient(null)
                       }
@@ -1528,6 +1549,10 @@ export default function CrmDashboard({
                         ] : editingPatient.notes
                       }
                       delete fallbackData.note
+                      // Save notes to localStorage
+                      if (fallbackData.notes) {
+                        saveNotesToStorage(editingPatient.id, fallbackData.notes)
+                      }
                       setPatients(prev => prev.map(p => p.id === editingPatient.id ? fallbackData : p))
                       setEditingPatient(null)
                     } finally {

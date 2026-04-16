@@ -226,6 +226,23 @@ export default function AdminPanel() {
     fetchPosts()
   }, [])
 
+  // Load saved notes from localStorage
+  const loadNotesFromStorage = (): Record<string, Note[]> => {
+    if (typeof window === 'undefined') return {}
+    try {
+      const saved = localStorage.getItem('crm-patient-notes')
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  // Save notes to localStorage
+  const saveNotesToStorage = (notes: Record<string, Note[]>) => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem('crm-patient-notes', JSON.stringify(notes))
+  }
+
   // Fetch CRM patients on mount
   useEffect(() => {
     const fetchPatients = async () => {
@@ -234,10 +251,24 @@ export default function AdminPanel() {
         if (!response.ok) throw new Error('Failed to fetch patients')
 
         const { patients: data } = await response.json()
-        setPatients(data || patientsSeed) // Fallback to seed data if API fails
+        
+        // Merge with localStorage notes (temporary until DB migration is applied)
+        const savedNotes = loadNotesFromStorage()
+        const mergedPatients = (data || patientsSeed).map((p: Patient) => ({
+          ...p,
+          notes: p.notes || savedNotes[p.id] || []
+        }))
+        
+        setPatients(mergedPatients)
       } catch (error) {
         console.error('Error fetching patients:', error)
-        // Keep seed data as fallback
+        // Merge seed data with localStorage notes
+        const savedNotes = loadNotesFromStorage()
+        const mergedPatients = patientsSeed.map(p => ({
+          ...p,
+          notes: p.notes || savedNotes[p.id] || []
+        }))
+        setPatients(mergedPatients)
       }
     }
 
