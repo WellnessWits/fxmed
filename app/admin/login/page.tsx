@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn, isAdmin } from '@/lib/supabase-auth'
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -16,23 +17,24 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      // For now, use a simple hardcoded check
-      // In production, this should use Supabase Auth or similar
-      const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@fxmed.com'
-      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'fxmed123'
-
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // Set session in localStorage
-        localStorage.setItem('admin_session', 'true')
-        localStorage.setItem('admin_login_time', new Date().toISOString())
-        
-        // Redirect to admin dashboard
-        router.push('/admin')
-      } else {
-        setError('Invalid email or password')
+      // Sign in with Supabase Auth
+      const { user, session } = await signIn(email, password)
+      
+      // Check if user has admin role
+      const userIsAdmin = await isAdmin()
+      
+      if (!userIsAdmin) {
+        // Sign out if not admin
+        const { supabase } = await import('@/lib/supabase-auth')
+        await supabase.auth.signOut()
+        setError('Access denied. Admin privileges required.')
+        return
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
+      
+      // Redirect to admin dashboard
+      router.push('/admin')
+    } catch (error: any) {
+      setError(error.message || 'Invalid email or password')
       console.error('Login error:', error)
     } finally {
       setLoading(false)

@@ -6,6 +6,7 @@ import BlogManagement from '@/components/admin/BlogManagement'
 import CrmDashboard from '@/components/admin/CrmDashboard'
 import SeoAnalytics from '@/components/admin/SeoAnalytics'
 import FunctionalHealthAnalysis from '@/components/admin/FunctionalHealthAnalysis'
+import { getSession, signOut, isAdmin } from '@/lib/supabase-auth'
 
 interface BlogPost {
   id: string
@@ -194,20 +195,50 @@ export default function AdminPanel() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'blog' | 'crm' | 'seo' | 'health'>('blog')
+  const [authChecking, setAuthChecking] = useState(true)
 
   // Check authentication on mount
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('admin_session') === 'true'
-    if (!isAuthenticated) {
-      router.push('/admin/login')
+    const checkAuth = async () => {
+      try {
+        const session = await getSession()
+        const userIsAdmin = await isAdmin()
+        
+        if (!session || !userIsAdmin) {
+          router.push('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/admin/login')
+      } finally {
+        setAuthChecking(false)
+      }
     }
+
+    checkAuth()
   }, [router])
 
   // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('admin_session')
-    localStorage.removeItem('admin_login_time')
-    router.push('/admin/login')
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push('/admin/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still redirect even if logout fails
+      router.push('/admin/login')
+    }
+  }
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-deep mx-auto mb-4"></div>
+          <p className="font-dm-sans text-green-deep">Verifying authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   // CRM state
