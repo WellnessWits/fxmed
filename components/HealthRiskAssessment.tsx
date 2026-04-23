@@ -79,7 +79,7 @@ const ASSESSMENTS: Record<string, Assessment> = {
           "Fertility challenges or trying to conceive",
           "Menstrual cycle irregularities",
           "Menopause or perimenopause symptoms",
-          "Sexual health concerns (low libido, ED)",
+          "Sexual health concerns (low libido, Erectile Dysfunction)",
           "Multiple hormonal concerns"
         ]
       },
@@ -261,7 +261,7 @@ export default function HealthRiskAssessment() {
       id: 'hormones',
       icon: '⚖️',
       title: "Hormones & Fertility",
-      subtitle: "Thyroid, ED, Menstrual, TTC, Menopause"
+      subtitle: "Thyroid, Erectile Dysfunction, Menstrual, Trying To Conceive, Menopause"
     },
     {
       id: 'heart',

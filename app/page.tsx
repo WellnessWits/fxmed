@@ -3,6 +3,7 @@ import Hero from '@/components/Hero'
 import About from '@/components/About'
 import MobileCare from '@/components/MobileCare'
 import HealthRiskAssessment from '@/components/HealthRiskAssessment'
+import FunctionalHealthSummary from '@/components/FunctionalHealthSummary'
 import Programs from '@/components/Programs'
 import Pricing from '@/components/Pricing'
 import CorporateWellness from '@/components/CorporateWellness'
@@ -22,6 +23,7 @@ export default function Home() {
       <About />
       <MobileCare />
       <HealthRiskAssessment />
+      <FunctionalHealthSummary />
       <Programs />
       <Pricing />
       <CorporateWellness />

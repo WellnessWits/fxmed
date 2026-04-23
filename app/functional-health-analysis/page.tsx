@@ -1,515 +1,467 @@
 'use client'
 
-import { useState } from 'react'
+import Link from 'next/link'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 
-interface FormData {
-  personalInfo: {
-    firstName: string
-    lastName: string
-    email: string
-    phone: string
-    age: string
-    gender: string
-  }
-  healthConcerns: {
-    primaryConcern: string
-    symptoms: string[]
-    duration: string
-    severity: string
-  }
-  lifestyle: {
-    diet: string
-    exercise: string
-    sleep: string
-    stress: string
-  }
-  medicalHistory: {
-    medications: string
-    supplements: string
-    conditions: string
-    surgeries: string
-  }
-  goals: {
-    primaryGoal: string
-    timeline: string
-    expectations: string
-  }
-}
-
 export default function FunctionalHealthAnalysis() {
-  const [currentSection, setCurrentSection] = useState(0)
-  const [formData, setFormData] = useState<FormData>({
-    personalInfo: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      age: '',
-      gender: ''
-    },
-    healthConcerns: {
-      primaryConcern: '',
-      symptoms: [],
-      duration: '',
-      severity: ''
-    },
-    lifestyle: {
-      diet: '',
-      exercise: '',
-      sleep: '',
-      stress: ''
-    },
-    medicalHistory: {
-      medications: '',
-      supplements: '',
-      conditions: '',
-      surgeries: ''
-    },
-    goals: {
-      primaryGoal: '',
-      timeline: '',
-      expectations: ''
-    }
-  })
-
-  const sections = [
-    { id: 'personal', title: 'Personal Information', description: 'Tell us about yourself' },
-    { id: 'concerns', title: 'Health Concerns', description: 'What brings you to us today?' },
-    { id: 'lifestyle', title: 'Lifestyle', description: 'Your daily habits and routines' },
-    { id: 'history', title: 'Medical History', description: 'Your health background' },
-    { id: 'goals', title: 'Health Goals', description: 'What do you want to achieve?' }
-  ]
-
-  const symptoms = [
-    'Fatigue/Low Energy', 'Digestive Issues', 'Hormonal Imbalance', 'Thyroid Issues',
-    'Weight Management', 'Sleep Problems', 'Stress/Anxiety', 'Brain Fog',
-    'Hair Loss', 'Skin Issues', 'Joint Pain', 'Headaches/Migraines'
-  ]
-
-  const handleInputChange = (section: keyof FormData, field: string, value: string | string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }))
-  }
-
-  const handleSymptomToggle = (symptom: string) => {
-    setFormData(prev => ({
-      ...prev,
-      healthConcerns: {
-        ...prev.healthConcerns,
-        symptoms: prev.healthConcerns.symptoms.includes(symptom)
-          ? prev.healthConcerns.symptoms.filter(s => s !== symptom)
-          : [...prev.healthConcerns.symptoms, symptom]
-      }
-    }))
-  }
-
-  const handleNext = () => {
-    if (currentSection < sections.length - 1) {
-      setCurrentSection(currentSection + 1)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentSection > 0) {
-      setCurrentSection(currentSection - 1)
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Save form data to localStorage for the results page
-    localStorage.setItem('healthAnalysisData', JSON.stringify(formData))
-    // Redirect to results page
-    window.location.href = '/functional-health-analysis/results'
-  }
-
-  const renderSection = () => {
-    switch (currentSection) {
-      case 0: // Personal Information
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">First Name</label>
-                <input
-                  type="text"
-                  value={formData.personalInfo.firstName}
-                  onChange={(e) => handleInputChange('personalInfo', 'firstName', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Last Name</label>
-                <input
-                  type="text"
-                  value={formData.personalInfo.lastName}
-                  onChange={(e) => handleInputChange('personalInfo', 'lastName', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.personalInfo.email}
-                  onChange={(e) => handleInputChange('personalInfo', 'email', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.personalInfo.phone}
-                  onChange={(e) => handleInputChange('personalInfo', 'phone', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Age</label>
-                <input
-                  type="number"
-                  value={formData.personalInfo.age}
-                  onChange={(e) => handleInputChange('personalInfo', 'age', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Gender</label>
-                <select
-                  value={formData.personalInfo.gender}
-                  onChange={(e) => handleInputChange('personalInfo', 'gender', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )
-
-      case 1: // Health Concerns
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Primary Health Concern</label>
-              <textarea
-                value={formData.healthConcerns.primaryConcern}
-                onChange={(e) => handleInputChange('healthConcerns', 'primaryConcern', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Please describe your main health concern..."
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Symptoms (select all that apply)</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {symptoms.map((symptom) => (
-                  <label key={symptom} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.healthConcerns.symptoms.includes(symptom)}
-                      onChange={() => handleSymptomToggle(symptom)}
-                      className="w-4 h-4 text-gold border-cream/30 rounded focus:ring-gold"
-                    />
-                    <span className="text-sm text-green-deep">{symptom}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Duration of Symptoms</label>
-                <select
-                  value={formData.healthConcerns.duration}
-                  onChange={(e) => handleInputChange('healthConcerns', 'duration', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                >
-                  <option value="">Select duration</option>
-                  <option value="few-weeks">A few weeks</option>
-                  <option value="few-months">A few months</option>
-                  <option value="year">1-2 years</option>
-                  <option value="several-years">Several years</option>
-                  <option value="chronic">Chronic (5+ years)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-green-deep font-dm-sans font-semibold mb-2">Severity (1-10)</label>
-                <select
-                  value={formData.healthConcerns.severity}
-                  onChange={(e) => handleInputChange('healthConcerns', 'severity', e.target.value)}
-                  className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                  required
-                >
-                  <option value="">Select severity</option>
-                  <option value="1-2">1-2 (Mild)</option>
-                  <option value="3-4">3-4 (Moderate)</option>
-                  <option value="5-6">5-6 (Significant)</option>
-                  <option value="7-8">7-8 (Severe)</option>
-                  <option value="9-10">9-10 (Very Severe)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )
-
-      case 2: // Lifestyle
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Diet & Nutrition</label>
-              <textarea
-                value={formData.lifestyle.diet}
-                onChange={(e) => handleInputChange('lifestyle', 'diet', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your typical diet, any restrictions, supplements, etc..."
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Exercise & Physical Activity</label>
-              <textarea
-                value={formData.lifestyle.exercise}
-                onChange={(e) => handleInputChange('lifestyle', 'exercise', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your exercise routine and activity level..."
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Sleep Patterns</label>
-              <textarea
-                value={formData.lifestyle.sleep}
-                onChange={(e) => handleInputChange('lifestyle', 'sleep', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your sleep quality, duration, any issues..."
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Stress Levels</label>
-              <textarea
-                value={formData.lifestyle.stress}
-                onChange={(e) => handleInputChange('lifestyle', 'stress', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your stress levels and sources of stress..."
-                required
-              />
-            </div>
-          </div>
-        )
-
-      case 3: // Medical History
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Current Medications</label>
-              <textarea
-                value={formData.medicalHistory.medications}
-                onChange={(e) => handleInputChange('medicalHistory', 'medications', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="List any current medications (including dosage)..."
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Supplements & Vitamins</label>
-              <textarea
-                value={formData.medicalHistory.supplements}
-                onChange={(e) => handleInputChange('medicalHistory', 'supplements', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="List any supplements, vitamins, or herbal remedies..."
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Medical Conditions</label>
-              <textarea
-                value={formData.medicalHistory.conditions}
-                onChange={(e) => handleInputChange('medicalHistory', 'conditions', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="List any diagnosed medical conditions..."
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Previous Surgeries</label>
-              <textarea
-                value={formData.medicalHistory.surgeries}
-                onChange={(e) => handleInputChange('medicalHistory', 'surgeries', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="List any previous surgeries with dates..."
-              />
-            </div>
-          </div>
-        )
-
-      case 4: // Goals
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Primary Health Goal</label>
-              <textarea
-                value={formData.goals.primaryGoal}
-                onChange={(e) => handleInputChange('goals', 'primaryGoal', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="What is your main health goal you want to achieve?"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Timeline</label>
-              <select
-                value={formData.goals.timeline}
-                onChange={(e) => handleInputChange('goals', 'timeline', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                required
-              >
-                <option value="">Select timeline</option>
-                <option value="1-month">1 month</option>
-                <option value="3-months">3 months</option>
-                <option value="6-months">6 months</option>
-                <option value="1-year">1 year</option>
-                <option value="ongoing">Ongoing</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-green-deep font-dm-sans font-semibold mb-2">Expectations</label>
-              <textarea
-                value={formData.goals.expectations}
-                onChange={(e) => handleInputChange('goals', 'expectations', e.target.value)}
-                className="w-full px-4 py-3 border border-cream/30 rounded-lg focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="What do you expect from our functional medicine program?"
-                required
-              />
-            </div>
-          </div>
-        )
-
-      default:
-        return null
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-white">
       <Navigation />
       
-      <div className="pt-[100px] pb-[90px] px-[5%]">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-4">
-              Smart Intake Form
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-green-deep via-green-mid to-gold py-40 px-[5%] overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="text-white">
+              <div className="inline-block bg-white/20 backdrop-blur px-4 py-2 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-6">
+                Advanced Health Diagnostics
+              </div>
+              <h1 className="font-dm-sans font-bold text-[clamp(2.5rem,5vw,4rem)] leading-[1.1] mb-6">
+                Discover Your Body's<br/>Hidden Health Patterns
+              </h1>
+              <p className="font-dm-sans text-[1.1rem] leading-[1.7] mb-8 text-white/90 max-w-[600px]">
+                Our functional health analysis goes beyond symptoms to identify root causes, predict health risks, and create personalized wellness strategies tailored to your unique biology.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link 
+                  href="/functional-health-analysis/form"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white text-green-deep rounded-[50px] font-dm-sans font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
+                >
+                  Take Free Analysis
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <button className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-[50px] font-dm-sans font-semibold text-lg hover:bg-white/10 transition-all">
+                  Watch Demo
+                </button>
+              </div>
+              
+              <div className="mt-8 flex items-center gap-6 text-sm text-white/80">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>100% Confidential</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>5-Min Assessment</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Instant Results</span>
+                </div>
+              </div>
             </div>
-            <h1 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-4">
-              Functional Health Analysis
-            </h1>
-            <p className="font-dm-sans text-black text-[1.05rem] leading-[1.7] max-w-[600px] mx-auto">
-              This comprehensive form helps us understand your unique health situation and create a personalized wellness plan just for you.
+            
+            <div className="relative">
+              <div className="bg-white/10 backdrop-blur rounded-[24px] p-8 border border-white/20">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">🧬</span>
+                    </div>
+                    <div>
+                      <h3 className="font-dm-sans font-semibold text-white">Genetic Markers</h3>
+                      <p className="text-sm text-white/70">Analyze your genetic predispositions</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">🔬</span>
+                    </div>
+                    <div>
+                      <h3 className="font-dm-sans font-semibold text-white">Lab Analysis</h3>
+                      <p className="text-sm text-white/70">Comprehensive blood work interpretation</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <div>
+                      <h3 className="font-dm-sans font-semibold text-white">Risk Assessment</h3>
+                      <p className="text-sm text-white/70">Predict future health challenges</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">💊</span>
+                    </div>
+                    <div>
+                      <h3 className="font-dm-sans font-semibold text-white">Personalized Plan</h3>
+                      <p className="text-sm text-white/70">Custom wellness strategies</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What We Analyze Section */}
+      <section className="py-20 px-[5%] bg-[#FCFFF0]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-4">
+              Comprehensive Analysis
+            </div>
+            <h2 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-4">
+              We Analyze What Others Miss
+            </h2>
+            <p className="font-dm-sans text-black text-[1.05rem] leading-[1.7] max-w-[560px] mx-auto">
+              Our advanced assessment evaluates multiple health systems to provide a complete picture of your wellbeing.
             </p>
           </div>
 
-          {/* Progress */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              {sections.map((section, index) => (
-                <div key={section.id} className="flex items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-dm-sans font-semibold ${
-                    index < currentSection 
-                      ? 'bg-green-light text-white' 
-                      : index === currentSection 
-                      ? 'bg-gold text-green-deep' 
-                      : 'bg-cream/50 text-green-deep/50'
-                  }`}>
-                    {index < currentSection ? '✓' : index + 1}
-                  </div>
-                  {index < sections.length - 1 && (
-                    <div className={`w-full h-1 mx-2 ${
-                      index < currentSection ? 'bg-green-light' : 'bg-cream/30'
-                    }`} />
-                  )}
-                </div>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-green-deep/10 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">🧠</span>
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Cognitive Health</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6]">
+                Brain function, memory, focus, and neurological patterns that impact daily performance.
+              </p>
             </div>
-            <div className="text-center">
-              <h2 className="font-dm-sans font-bold text-green-deep text-xl mb-1">
-                {sections[currentSection].title}
-              </h2>
-              <p className="font-dm-sans text-green-deep/70 text-sm">
-                {sections[currentSection].description}
+
+            <div className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-green-deep/10 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">❤️</span>
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Heart & Metabolism</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6]">
+                Cardiovascular health, metabolic efficiency, and energy production at cellular level.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-green-deep/10 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">⚖️</span>
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Hormonal Balance</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6]">
+                Endocrine system function, hormone levels, and reproductive health optimization.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-shadow">
+              <div className="w-16 h-16 bg-green-deep/10 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">🛡️</span>
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Immune Function</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6]">
+                Immune system strength, inflammation markers, and disease resistance capacity.
               </p>
             </div>
           </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-[24px] border border-green-mid/20 p-8">
-            {renderSection()}
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-cream/30">
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={currentSection === 0}
-                className="bg-transparent text-green-deep border border-green-deep/30 px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans transition-all hover:border-green-deep hover:bg-green-deep/8 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Back
-              </button>
-              
-              <span className="font-dm-sans text-green-deep/60 text-[0.85rem]">
-                Step {currentSection + 1} of {sections.length}
-              </span>
-              
-              {currentSection === sections.length - 1 ? (
-                <button
-                  type="submit"
-                  className="bg-gold text-green-deep px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans transition-all hover:bg-gold-light"
-                >
-                  Submit Form
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="bg-gold text-green-deep px-8 py-3 rounded-[30px] font-semibold text-[0.95rem] font-dm-sans transition-all hover:bg-gold-light"
-                >
-                  Next
-                </button>
-              )}
-            </div>
-          </form>
         </div>
-      </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-20 px-[5%] bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-4">
+              Simple Process
+            </div>
+            <h2 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-4">
+              Get Your Analysis in 3 Simple Steps
+            </h2>
+            <p className="font-dm-sans text-black text-[1.05rem] leading-[1.7] max-w-[560px] mx-auto">
+              Our streamlined process makes it easy to get comprehensive health insights without overwhelming complexity.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-deep">
+                1
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Take Assessment</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6] mb-4">
+                Answer our AI-powered questionnaire about your health concerns and lifestyle.
+              </p>
+              <div className="text-sm text-green-mid font-medium">5 minutes</div>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-deep">
+                2
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Get Results</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6] mb-4">
+                Receive instant personalized insights with risk levels and recommendations.
+              </p>
+              <div className="text-sm text-green-mid font-medium">Instant</div>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-deep">
+                3
+              </div>
+              <h3 className="font-dm-sans font-semibold text-green-deep text-xl mb-3">Start Your Journey</h3>
+              <p className="font-dm-sans text-text-mid leading-[1.6] mb-4">
+                Book a consultation with our functional medicine experts to begin your personalized program.
+              </p>
+              <div className="text-sm text-green-mid font-medium">Optional</div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link 
+              href="/functional-health-analysis/form"
+              className="inline-flex items-center justify-center px-8 py-4 bg-green-deep text-white rounded-[16px] font-dm-sans font-bold text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-xl"
+            >
+              Start Your Analysis Now
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 px-[5%] bg-gradient-to-br from-green-deep/5 to-gold/5">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-4">
+                Why Choose FXMed
+              </div>
+              <h2 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-6">
+                Beyond Traditional Healthcare
+              </h2>
+              <p className="font-dm-sans text-black text-[1.05rem] leading-[1.7] mb-8">
+                Unlike conventional medicine that treats symptoms, our functional health analysis identifies 
+                root causes and creates personalized strategies for optimal wellness.
+              </p>
+
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="w-6 h-6 bg-gold rounded-full flex-shrink-0 mt-1"></div>
+                  <div>
+                    <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Root Cause Analysis</h3>
+                    <p className="font-dm-sans text-text-mid leading-[1.6]">
+                      We identify underlying imbalances rather than just masking symptoms with medications.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-6 h-6 bg-gold rounded-full flex-shrink-0 mt-1"></div>
+                  <div>
+                    <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Personalized Protocols</h3>
+                    <p className="font-dm-sans text-text-mid leading-[1.6]">
+                      Your health plan is tailored to your unique biology, lifestyle, and health goals.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-6 h-6 bg-gold rounded-full flex-shrink-0 mt-1"></div>
+                  <div>
+                    <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Preventive Focus</h3>
+                    <p className="font-dm-sans text-text-mid leading-[1.6]">
+                      We predict and prevent health issues before they become chronic conditions.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-6 h-6 bg-gold rounded-full flex-shrink-0 mt-1"></div>
+                  <div>
+                    <h3 className="font-dm-sans font-semibold text-green-deep mb-2">Scientific Approach</h3>
+                    <p className="font-dm-sans text-text-mid leading-[1.6]">
+                      Based on cutting-edge research and advanced diagnostic technologies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-[24px] p-8 shadow-xl">
+              <div className="text-center mb-6">
+                <h3 className="font-dm-sans font-bold text-green-deep text-2xl mb-2">
+                  Ready to Transform Your Health?
+                </h3>
+                <p className="font-dm-sans text-text-mid">
+                  Join thousands who have discovered their path to optimal wellness
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="text-center p-4 bg-green-deep/5 rounded-lg">
+                  <div className="text-3xl font-bold text-green-deep mb-1">10,000+</div>
+                  <div className="text-sm text-text-mid">Analyses Completed</div>
+                </div>
+                <div className="text-center p-4 bg-gold/20 rounded-lg">
+                  <div className="text-3xl font-bold text-green-deep mb-1">95%</div>
+                  <div className="text-sm text-text-mid">Success Rate</div>
+                </div>
+              </div>
+
+              <Link 
+                href="/functional-health-analysis/form"
+                className="w-full inline-flex items-center justify-center px-6 py-3 bg-gold text-green-deep rounded-[12px] font-dm-sans font-bold hover:bg-gold-light transition-all"
+              >
+                Take Your Free Analysis
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-[5%] bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block text-green-mid bg-green-mid/10 px-4 py-1.5 rounded-[20px] text-[0.75rem] font-semibold tracking-[0.14em] uppercase mb-4">
+              Success Stories
+            </div>
+            <h2 className="font-dm-sans font-bold text-green-deep text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-4">
+              Real Results, Real People
+            </h2>
+            <p className="font-dm-sans text-black text-[1.05rem] leading-[1.7] max-w-[560px] mx-auto">
+              Discover how our functional health analysis has transformed lives across Nigeria.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-[#FCFFF0] rounded-[20px] p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-mid rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  A
+                </div>
+                <div>
+                  <h4 className="font-dm-sans font-semibold text-green-deep">Amara O.</h4>
+                  <p className="text-sm text-text-mid">Lagos, 45 years</p>
+                </div>
+              </div>
+              <p className="font-dm-sans text-text-mid leading-[1.6] italic">
+                "The analysis revealed hormonal imbalances I never knew about. Three months later, 
+                I feel like I'm in my twenties again!"
+              </p>
+              <div className="flex mt-4">
+                {[1,2,3,4,5].map((star) => (
+                  <svg key={star} className="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#FCFFF0] rounded-[20px] p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-mid rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  C
+                </div>
+                <div>
+                  <h4 className="font-dm-sans font-semibold text-green-deep">Chinedu A.</h4>
+                  <p className="text-sm text-text-mid">Abuja, 38 years</p>
+                </div>
+              </div>
+              <p className="font-dm-sans text-text-mid leading-[1.6] italic">
+                "Finally understood why I was always tired. The personalized plan changed my life. 
+                I have energy to play with my kids again!"
+              </p>
+              <div className="flex mt-4">
+                {[1,2,3,4,5].map((star) => (
+                  <svg key={star} className="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#FCFFF0] rounded-[20px] p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-mid rounded-full flex items-center justify-center text-white font-bold mr-3">
+                  F
+                </div>
+                <div>
+                  <h4 className="font-dm-sans font-semibold text-green-deep">Funke L.</h4>
+                  <p className="text-sm text-text-mid">Port Harcourt, 52 years</p>
+                </div>
+              </div>
+              <p className="font-dm-sans text-text-mid leading-[1.6] italic">
+                "The cancer screening assessment was eye-opening. Early detection saved my life. 
+                Grateful for this technology."
+              </p>
+              <div className="flex mt-4">
+                {[1,2,3,4,5].map((star) => (
+                  <svg key={star} className="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 px-[5%] bg-gradient-to-br from-green-deep to-green-mid">
+        <div className="max-w-4xl mx-auto text-center text-white">
+          <h2 className="font-dm-sans font-bold text-[clamp(2rem,4vw,3rem)] leading-[1.15] mb-6">
+            Your Health Journey Starts Here
+          </h2>
+          <p className="font-dm-sans text-[1.1rem] leading-[1.7] mb-8 text-white/90">
+            Take the first step towards optimal health with our free, comprehensive functional health analysis. 
+            No obligation, just insights that can transform your life.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/functional-health-analysis/form"
+              className="inline-flex items-center justify-center px-8 py-4 bg-white text-green-deep rounded-[16px] font-dm-sans font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
+            >
+              Take Free Analysis Now
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+            <a 
+              href="tel:+2348123456789"
+              className="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white rounded-[16px] font-dm-sans font-semibold text-lg hover:bg-white/10 transition-all"
+            >
+              Call Us: +234 812 345 6789
+            </a>
+          </div>
+          
+          <div className="mt-8 flex items-center justify-center gap-6 text-sm text-white/80">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Free Assessment</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Instant Results</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Confidential & Secure</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>

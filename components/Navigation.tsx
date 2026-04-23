@@ -17,6 +17,7 @@ export default function Navigation() {
   }, [])
 
   const isBlogPage = pathname?.startsWith('/blog')
+const isHealthAssessmentPage = pathname === '/health-assessment'
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -28,12 +29,12 @@ export default function Navigation() {
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      isScrolled 
+      isScrolled || isHealthAssessmentPage
         ? 'bg-green-deep/95 backdrop-blur-md border-b border-gold/20' 
         : 'bg-transparent'
     }`}>
       <div className="flex items-center justify-between px-[5%] py-[18px]">
-        <a href="#" className="flex items-center no-underline">
+        <a href="/" className="flex items-center no-underline">
           <img 
             src="/logo.png" 
             alt="FXMed" 
@@ -46,6 +47,7 @@ export default function Navigation() {
           <li><a href="#about" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>About</a></li>
           <li><a href="#programs" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Programs</a></li>
           <li><a href="#services" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Services</a></li>
+          <li><a href="/functional-health-analysis" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Health Analysis</a></li>
           <li><a href="#pricing" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Pricing</a></li>
           <li><a href="#gallery" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Gallery</a></li>
           <li><a href="#contact" className={`text-[0.9rem] font-medium no-underline transition-colors hover:text-gold ${(isBlogPage && !isScrolled) ? 'text-black' : 'text-cream/85'}`}>Contact</a></li>
@@ -89,6 +91,7 @@ export default function Navigation() {
             <li><a href="#about" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">About</a></li>
             <li><a href="#programs" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Programs</a></li>
             <li><a href="#services" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Services</a></li>
+            <li><a href="/functional-health-analysis" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Health Analysis</a></li>
             <li><a href="#pricing" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Pricing</a></li>
             <li><a href="#gallery" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Gallery</a></li>
             <li><a href="#contact" onClick={closeMobileMenu} className="block text-[1rem] font-medium no-underline transition-colors hover:text-gold text-cream/85 py-2">Contact</a></li>

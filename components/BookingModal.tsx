@@ -13,6 +13,7 @@ interface BookingData {
   lastName: string
   email: string
   phone: string
+  homeAddress: string
   preferredDate: string
   preferredTime: string
   symptoms: string
@@ -26,6 +27,7 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
     lastName: '',
     email: '',
     phone: '',
+    homeAddress: '',
     preferredDate: '',
     preferredTime: '',
     symptoms: '',
@@ -65,6 +67,7 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
       lastName: '',
       email: '',
       phone: '',
+      homeAddress: '',
       preferredDate: '',
       preferredTime: '',
       symptoms: '',
@@ -85,7 +88,7 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return bookingData.firstName && bookingData.lastName && bookingData.email && bookingData.phone
+        return bookingData.firstName && bookingData.lastName && bookingData.email && bookingData.phone && bookingData.homeAddress
       case 2:
         return bookingData.preferredDate && bookingData.preferredTime
       case 3:
@@ -201,6 +204,19 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
                   placeholder="+234 800 000 0000"
                 />
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Home Address *
+                </label>
+                <textarea
+                  value={bookingData.homeAddress}
+                  onChange={(e) => updateBookingData('homeAddress', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-mid focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter your complete home address including street, city, and state"
+                />
+              </div>
             </div>
           )}
 
@@ -306,6 +322,10 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
                 <div className="flex justify-between">
                   <span className="text-gray-600">Phone:</span>
                   <span className="font-medium">{bookingData.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Home Address:</span>
+                  <span className="font-medium text-right max-w-[60%]">{bookingData.homeAddress}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Date:</span>

@@ -1,6 +1,10 @@
 'use client'
 
+import { useState } from 'react'
+import AppointmentModal from '@/components/AppointmentModal'
+
 export default function Hero() {
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
   return (
     <section className="relative min-h-screen overflow-hidden flex items-center px-[5%] pt-[100px] pb-[60px]">
       {/* Background Image */}
@@ -80,9 +84,12 @@ export default function Hero() {
         
         {/* Actions */}
         <div className="flex flex-col gap-4 items-center animate-fade-in-up max-w-sm mx-auto">
-          <a href="/functional-health-analysis" className="font-dm-sans bg-gold text-green-deep px-6 py-4 rounded-[50px] font-semibold text-[1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block text-center w-full whitespace-nowrap">
-            Take Functional Health Assessment
-          </a>
+          <button 
+            onClick={() => setShowAppointmentModal(true)}
+            className="font-dm-sans bg-gold text-green-deep px-6 py-4 rounded-[50px] font-semibold text-[1rem] transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block text-center w-full whitespace-nowrap"
+          >
+            Book an Appointment
+          </button>
           <a href="#programs" className="font-dm-sans bg-transparent text-cream px-9 py-[15px] rounded-[50px] font-medium text-[1rem] no-underline border border-cream/40 transition-all hover:border-cream hover:bg-cream/8 inline-block text-center w-full">
             View Programs
           </a>
@@ -104,6 +111,12 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      
+      {/* Appointment Modal */}
+      <AppointmentModal 
+        isOpen={showAppointmentModal} 
+        onClose={() => setShowAppointmentModal(false)} 
+      />
     </section>
   )
 }
