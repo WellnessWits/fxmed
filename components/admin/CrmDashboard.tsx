@@ -1129,6 +1129,221 @@ export default function CrmDashboard({
         </div>
       )}
 
+      {/* Calendar/Schedule Section */}
+      {activeSection === "calendar" && (
+        <div className="bg-white rounded-[20px] p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-dm-sans font-bold text-green-deep">
+                Schedule & Appointments
+              </h2>
+              <p className="text-text-mid mt-1">
+                Manage and view all patient appointments
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button className="px-4 py-2 bg-green-deep text-white rounded-lg font-dm-sans hover:bg-green-700 transition-colors">
+                + New Appointment
+              </button>
+              <button className="px-4 py-2 border border-green-deep/20 rounded-lg font-dm-sans hover:bg-gray-50 transition-colors">
+                Export Calendar
+              </button>
+            </div>
+          </div>
+
+          {/* Mock appointment data - in real app, this would come from API */}
+          <div className="space-y-4">
+            {/* Today's Appointments */}
+            <div>
+              <h3 className="font-dm-sans font-semibold text-green-deep mb-3">Today - March 25, 2026</h3>
+              <div className="space-y-2">
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Telemedicine</span>
+                        <span className="font-dm-sans font-semibold text-gray-900">Amara Okafor</span>
+                        <span className="text-sm text-gray-500">FX001</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Time:</span>
+                          <span className="ml-2 font-medium">10:30 AM</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Duration:</span>
+                          <span className="ml-2 font-medium">45 mins</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Program:</span>
+                          <span className="ml-2 font-medium">Cardiometabolic Care</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Owner:</span>
+                          <span className="ml-2 font-medium">Tola</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="text-gray-500">Notes:</span> Initial consultation - hypertension management
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Edit</button>
+                      <button className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-1 bg-gold text-green-deep text-xs font-medium rounded">Home Visit</span>
+                        <span className="font-dm-sans font-semibold text-gray-900">Chinedu Adeyemi</span>
+                        <span className="text-sm text-gray-500">FX002</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Time:</span>
+                          <span className="ml-2 font-medium">2:00 PM</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Duration:</span>
+                          <span className="ml-2 font-medium">60 mins</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Program:</span>
+                          <span className="ml-2 font-medium">Executive Concierge</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Owner:</span>
+                          <span className="ml-2 font-medium">Tola</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="text-gray-500">Notes:</span> Follow-up visit - lab results review
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Edit</button>
+                      <button className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tomorrow's Appointments */}
+            <div>
+              <h3 className="font-dm-sans font-semibold text-green-deep mb-3">Tomorrow - March 26, 2026</h3>
+              <div className="space-y-2">
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Telemedicine</span>
+                        <span className="font-dm-sans font-semibold text-gray-900">Funke Lawal</span>
+                        <span className="text-sm text-gray-500">FX003</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Time:</span>
+                          <span className="ml-2 font-medium">11:00 AM</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Duration:</span>
+                          <span className="ml-2 font-medium">45 mins</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Program:</span>
+                          <span className="ml-2 font-medium">Hormonal Health</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Owner:</span>
+                          <span className="ml-2 font-medium">Tola</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="text-gray-500">Notes:</span> Thyroid consultation - medication review
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Edit</button>
+                      <button className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Upcoming Appointments */}
+            <div>
+              <h3 className="font-dm-sans font-semibold text-green-deep mb-3">Upcoming This Week</h3>
+              <div className="space-y-2">
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow opacity-75">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Telemedicine</span>
+                        <span className="font-dm-sans font-semibold text-gray-900">David Chen</span>
+                        <span className="text-sm text-gray-500">FX004</span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Date:</span>
+                          <span className="ml-2 font-medium">March 27</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Time:</span>
+                          <span className="ml-2 font-medium">3:30 PM</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Program:</span>
+                          <span className="ml-2 font-medium">Nutritional Medicine</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Owner:</span>
+                          <span className="ml-2 font-medium">Tola</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="text-gray-500">Notes:</span> Nutrition follow-up - meal plan review
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Edit</button>
+                      <button className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Stats */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-deep">8</div>
+                <div className="text-sm text-gray-500">Total Appointments</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-mid">2</div>
+                <div className="text-sm text-gray-500">Today</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gold">1</div>
+                <div className="text-sm text-gray-500">Tomorrow</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-600">5</div>
+                <div className="text-sm text-gray-500">This Week</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lead Creation Modal */}
       {showLeadModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

@@ -2,7 +2,7 @@ import Navigation from '@/components/Navigation'
 import Hero from '@/components/Hero'
 import About from '@/components/About'
 import MobileCare from '@/components/MobileCare'
-import QuizSection from '@/components/QuizSection'
+import HealthRiskAssessment from '@/components/HealthRiskAssessment'
 import Programs from '@/components/Programs'
 import Pricing from '@/components/Pricing'
 import CorporateWellness from '@/components/CorporateWellness'
@@ -21,7 +21,7 @@ export default function Home() {
       <Hero />
       <About />
       <MobileCare />
-      <QuizSection />
+      <HealthRiskAssessment />
       <Programs />
       <Pricing />
       <CorporateWellness />
