@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import BlogManagement from '@/components/admin/BlogManagement'
 import CrmDashboard from '@/components/admin/CrmDashboard'
 import SeoAnalytics from '@/components/admin/SeoAnalytics'
@@ -189,9 +190,25 @@ const patientsSeed: Patient[] = [
 ]
 
 export default function AdminPanel() {
+  const router = useRouter()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'blog' | 'crm' | 'seo' | 'health'>('blog')
+
+  // Check authentication on mount
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('admin_session') === 'true'
+    if (!isAuthenticated) {
+      router.push('/admin/login')
+    }
+  }, [router])
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('admin_session')
+    localStorage.removeItem('admin_login_time')
+    router.push('/admin/login')
+  }
 
   // CRM state
   const [patients, setPatients] = useState<Patient[]>(patientsSeed)
@@ -354,13 +371,21 @@ export default function AdminPanel() {
               className="h-[120px] w-auto"
             />
           </div>
-          <div className="text-right">
-            <h1 className="text-2xl font-dm-sans font-bold text-cream">
-              Admin Panel
-            </h1>
-            <p className="text-sm text-cream/70">
-              Management Dashboard
-            </p>
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <h1 className="text-2xl font-dm-sans font-bold text-cream">
+                Admin Panel
+              </h1>
+              <p className="text-sm text-cream/70">
+                Management Dashboard
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="font-dm-sans bg-white/10 hover:bg-white/20 text-cream px-4 py-2 rounded-[30px] font-semibold text-sm transition-all"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </header>

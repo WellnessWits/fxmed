@@ -104,7 +104,8 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
       })
     } catch (error) {
       console.error('Error saving appointment:', error)
-      alert('There was an error saving your appointment. Please try again.')
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      alert(`There was an error saving your appointment: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
     } finally {
       setIsSubmitting(false)
     }
