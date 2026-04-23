@@ -22,6 +22,7 @@ interface BookingData {
 
 export default function BookingModal({ isOpen, onClose, consultationType }: BookingModalProps) {
   const [currentStep, setCurrentStep] = useState(1)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [bookingData, setBookingData] = useState<BookingData>({
     firstName: '',
     lastName: '',
@@ -48,31 +49,65 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
     }
   }
 
-  const handleSubmit = () => {
-    // Here you would typically send the booking data to your backend
-    console.log('Booking data:', bookingData)
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
     
-    // Redirect to appropriate Paystack payment link based on consultation type
-    const paymentLink = consultationType === 'telemedicine' 
-      ? 'https://paystack.shop/pay/x1ui5e7uw3'
-      : 'https://paystack.shop/pay/pxog7uys-t'
-    
-    window.open(paymentLink, '_blank')
-    
-    // Close the modal and reset form
-    onClose()
-    setCurrentStep(1)
-    setBookingData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      homeAddress: '',
-      preferredDate: '',
-      preferredTime: '',
-      symptoms: '',
-      consultationType
-    })
+    try {
+      // Save booking to Supabase first
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: bookingData.firstName,
+          lastName: bookingData.lastName,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          homeAddress: bookingData.homeAddress,
+          consultationType: bookingData.consultationType,
+          preferredDate: bookingData.preferredDate,
+          preferredTime: bookingData.preferredTime,
+          symptoms: bookingData.symptoms,
+          status: 'pending',
+          paymentStatus: 'pending'
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save appointment')
+      }
+
+      const data = await response.json()
+      console.log('Appointment saved:', data)
+      
+      // Redirect to appropriate Paystack payment link based on consultation type
+      const paymentLink = consultationType === 'telemedicine' 
+        ? 'https://paystack.shop/pay/x1ui5e7uw3'
+        : 'https://paystack.shop/pay/pxog7uys-t'
+      
+      window.open(paymentLink, '_blank')
+      
+      // Close the modal and reset form
+      onClose()
+      setCurrentStep(1)
+      setBookingData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        homeAddress: '',
+        preferredDate: '',
+        preferredTime: '',
+        symptoms: '',
+        consultationType
+      })
+    } catch (error) {
+      console.error('Error saving appointment:', error)
+      alert('There was an error saving your appointment. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const updateBookingData = (field: keyof BookingData, value: string) => {
@@ -376,9 +411,10 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
             ) : (
               <button
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-gold text-green-deep rounded-lg font-semibold hover:bg-gold-light"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-gold text-green-deep rounded-lg font-semibold hover:bg-gold-light disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Confirm Booking
+                {isSubmitting ? 'Saving...' : 'Confirm Booking'}
               </button>
             )}
           </div>
