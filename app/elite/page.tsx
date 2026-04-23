@@ -67,12 +67,12 @@ export default function Elite() {
       description: "At-home or via courier"
     },
     {
-      icon: <img src="/Sparkle.svg" alt="Sparkle" className="w-8 h-8" />,
+      icon: <img src="/FlowerLotus.svg" alt="Flower Lotus" className="w-8 h-8" />,
       title: "Mental Wellness",
       description: "Psychological support"
     },
     {
-      icon: <img src="/Ambulance.svg?v=3" alt="Ambulance" className="w-8 h-8" />,
+      icon: <img src="/Ambulance 2.svg" alt="Ambulance" className="w-8 h-8" />,
       title: "Mobile Clinic Access",
       description: "On-demand health visits"
     }

@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import AppointmentModal from '@/components/AppointmentModal'
 
 export default function Pricing() {
-  const [activeTab, setActiveTab] = useState('concierge')
+  const [activeTab, setActiveTab] = useState('personal-wellness')
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
 
   return (
     <>
@@ -26,14 +28,14 @@ export default function Pricing() {
         <div className="flex justify-center mb-16">
           <div className="inline-flex bg-white rounded-[50px] p-1 shadow-sm">
             <button 
-              onClick={() => setActiveTab('concierge')}
+              onClick={() => setActiveTab('personal-wellness')}
               className={`font-dm-sans px-6 py-3 rounded-[50px] text-[1rem] font-medium transition-all ${
-                activeTab === 'concierge' 
+                activeTab === 'personal-wellness' 
                   ? 'bg-gold text-green-deep' 
                   : 'text-green-deep hover:bg-green-deep/10'
               }`}
             >
-              Concierge Packages
+              Personal Wellness
             </button>
             <button 
               onClick={() => setActiveTab('pregnancy')}
@@ -58,172 +60,82 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* Concierge Packages Content */}
-        {activeTab === 'concierge' && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
-            {/* Standard Plan */}
+        {/* Personal Wellness Content */}
+        {activeTab === 'personal-wellness' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
+            {/* Teleconsultation */}
             <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
               <div className="mb-6">
-                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Standard</h3>
+                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.3rem] mb-2">Teleconsultation</h3>
+                <p className="font-dm-sans text-text-mid text-sm mb-4">WhatsApp Video or Google Meet</p>
                 <div className="mb-4">
-                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦65,000</span>
+                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦25,000</span>
                 </div>
                 <div className="mb-4">
-                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month</span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-dm-sans text-black text-[0.8rem] font-medium">Minimum 3 months subscription</span>
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">Per consultation</span>
                 </div>
               </div>
               
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Quarterly house call / visit</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Same-day appointments available</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">2 tele-consults per month</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Expert practitioners</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Open-slot booking</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Personalized care plan</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Personalized care</span>
                 </li>
               </ul>
               
-              <a href="#contact" className="w-full block text-center bg-green-deep text-cream px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] no-underline transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px]">
-                Get Started
-              </a>
+              <button onClick={() => setShowAppointmentModal(true)} className="w-full block text-center bg-green-deep text-cream px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px]">
+                Book Now
+              </button>
             </div>
 
-            {/* Basic Plan */}
-            <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
-              <div className="mb-6">
-                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Basic</h3>
-                <div className="mb-4">
-                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦80,000</span>
-                </div>
-                <div className="mb-4">
-                  <span className="font-dm-sans text-text-mid text-[0.9rem]">one month assessment</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">2 tele-consults per month</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Open-slot booking</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Personalized care plan</span>
-                </li>
-              </ul>
-              
-              <a href="#contact" className="w-full block text-center bg-green-deep text-cream px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] no-underline transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px]">
-                Get Started
-              </a>
-            </div>
-
-            {/* Gold Plan - Most Popular */}
+            {/* Home Visit */}
             <div className="bg-white rounded-[24px] p-8 border-2 border-gold shadow-custom-hover relative transform scale-105">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-gold text-green-deep px-4 py-1 rounded-full text-[0.75rem] font-semibold">
-                  Most Popular
+                  Premium
                 </span>
               </div>
               
               <div className="mb-6 mt-2">
-                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Gold</h3>
+                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.3rem] mb-2">Home Visit</h3>
+                <p className="font-dm-sans text-text-mid text-sm mb-4">Mobile clinic comes to you</p>
                 <div className="mb-4">
-                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦450,000</span>
+                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦85,000</span>
                 </div>
                 <div className="mb-4">
-                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month · up to 3 family members</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Monthly house call (vitals + physical)</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">4 tele-consults per month</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Basic labs (CBC, Lipid, KFT, LFT, HbA1c)</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">1 massage or premium facial</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">1 IV therapy infusion</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Priority booking · 10% off add-ons</span>
-                </li>
-              </ul>
-              
-              <a href="#contact" className="w-full block text-center bg-gold text-green-deep px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px]">
-                Get Started
-              </a>
-            </div>
-
-            {/* Platinum Plan */}
-            <div className="bg-white rounded-[24px] p-8 border border-green-deep/10 shadow-custom hover:shadow-custom-hover transition-all">
-              <div className="mb-6">
-                <h3 className="font-dm-sans font-semibold text-green-deep text-[1.1rem] mb-2">Platinum</h3>
-                <div className="mb-4">
-                  <span className="font-dm-sans font-bold text-green-deep text-[3rem]">₦700,000</span>
+                  <span className="font-dm-sans text-text-mid text-[0.9rem]">Lagos only</span>
                 </div>
                 <div className="mb-4">
-                  <span className="font-dm-sans text-text-mid text-[0.9rem]">per month · up to 5 family members</span>
+                  <span className="font-dm-sans text-text-mid text-[0.8rem] italic">Call for out-of-state pricing</span>
                 </div>
               </div>
               
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Monthly house call</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Same-day appointments available</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">6 tele-consults per month</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Expert practitioners</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Comprehensive labs + ECG + Ultrasound</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">2 massage sessions</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">2 IV drip therapy sessions</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-green-mid mr-3 mt-1">✓</span>
-                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Priority specialist access · 15% off</span>
+                  <span className="font-dm-sans text-text-mid text-[0.95rem]">Personalized care</span>
                 </li>
               </ul>
               
-              <a href="#contact" className="w-full block text-center bg-green-deep text-cream px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] no-underline transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px]">
-                Get Started
-              </a>
+              <button onClick={() => setShowAppointmentModal(true)} className="w-full block text-center bg-gold text-green-deep px-6 py-3 rounded-[30px] font-semibold text-[0.95rem] transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px]">
+                Book Now
+              </button>
             </div>
           </div>
         )}
@@ -383,7 +295,7 @@ export default function Pricing() {
 
             <div className="bg-white rounded-[24px] p-8 border-2 border-gold shadow-custom-hover relative transform scale-105">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gold text-green-deep px-4 -py-1 rounded-full text-[0.75rem] font-semibold">
+                <span className="bg-gold text-green-deep px-4 py-1 rounded-full text-[0.75rem] font-semibold">
                   Best Value
                 </span>
               </div>
@@ -459,6 +371,10 @@ export default function Pricing() {
         )}
       </div>
     </section>
+    
+    {showAppointmentModal && (
+      <AppointmentModal isOpen={showAppointmentModal} onClose={() => setShowAppointmentModal(false)} />
+    )}
     </>
   )
 }

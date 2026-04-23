@@ -12,6 +12,7 @@ import PhotoGallery from '@/components/PhotoGallery'
 import FreshPerspectives from '@/components/FreshPerspectives'
 import PatientStories from '@/components/PatientStories'
 import HealthCTA from '@/components/HealthCTA'
+import FXMedElite from '@/components/FXMedElite'
 import Footer from '@/components/Footer'
 import AIChat from '@/components/AIChat'
 
@@ -26,6 +27,7 @@ export default function Home() {
       <FunctionalHealthSummary />
       <Programs />
       <Pricing />
+      <FXMedElite />
       <CorporateWellness />
       <VideoSection />
       <PhotoGallery />

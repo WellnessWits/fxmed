@@ -1,6 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+import AppointmentModal from '@/components/AppointmentModal'
+
 export default function HealthCTA() {
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false)
+
   return (
     <section id="health-cta" className="bg-green-deep py-[90px] px-[5%]">
       <div className="max-w-7xl mx-auto text-center">
@@ -20,15 +25,17 @@ export default function HealthCTA() {
         </p>
         
         {/* CTA Button */}
-        <a 
-          href="https://outlook.office.com/book/FXMedAppointment@wellnesswits.com/s/cLNpEWZfGkWVlIC6hJnipA2?ismsaljsauthenabled" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="font-dm-sans bg-gold text-green-deep px-10 py-5 rounded-[50px] font-semibold text-[1.1rem] no-underline transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block"
+        <button 
+          onClick={() => setShowAppointmentModal(true)}
+          className="font-dm-sans bg-gold text-green-deep px-10 py-5 rounded-[50px] font-semibold text-[1.1rem] transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg inline-block"
         >
           Book Your Appointment Today →
-        </a>
+        </button>
       </div>
+
+      {showAppointmentModal && (
+        <AppointmentModal isOpen={showAppointmentModal} onClose={() => setShowAppointmentModal(false)} />
+      )}
     </section>
   )
 }
