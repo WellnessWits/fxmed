@@ -1,77 +1,39 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
   // Check if the request is for admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
     // Allow access to login page
     if (request.nextUrl.pathname === '/admin/login') {
-      return response
+      return NextResponse.next()
     }
 
-    // Check for authenticated session
-    const { data: { session } } = await supabase.auth.getSession()
+    // Get the session from the cookie
+    const accessToken = request.cookies.get('sb-access-token')?.value
+    const refreshToken = request.cookies.get('sb-refresh-token')?.value
 
-    if (!session) {
-      // Redirect to login if not authenticated
+    if (!accessToken) {
+      // Redirect to login if no access token
+      const redirectUrl = new URL('/admin/login', request.url)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Verify the session with Supabase
+    const { data: { user }, error } = await supabase.auth.getUser(accessToken)
+
+    if (error || !user) {
+      // Redirect to login if session is invalid
       const redirectUrl = new URL('/admin/login', request.url)
       return NextResponse.redirect(redirectUrl)
     }
 
     // Check if user has admin role
-    const { data: { user } } = await supabase.auth.getUser()
     const userMetadata = user?.user_metadata
     const isAdmin = userMetadata?.role === 'admin' || userMetadata?.is_admin === true
 
@@ -82,7 +44,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return response
+  return NextResponse.next()
 }
 
 export const config = {

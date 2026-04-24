@@ -7,6 +7,7 @@ import CrmDashboard from '@/components/admin/CrmDashboard'
 import SeoAnalytics from '@/components/admin/SeoAnalytics'
 import FunctionalHealthAnalysis from '@/components/admin/FunctionalHealthAnalysis'
 import Messages from '@/components/admin/Messages'
+import Notifications from '@/components/admin/Notifications'
 import { getSession, signOut, isAdmin } from '@/lib/supabase-auth'
 
 interface BlogPost {
@@ -412,6 +413,7 @@ export default function AdminPanel() {
                 Management Dashboard
               </p>
             </div>
+            <Notifications />
             <button
               onClick={handleLogout}
               className="font-dm-sans bg-white/10 hover:bg-white/20 text-cream px-4 py-2 rounded-[30px] font-semibold text-sm transition-all"
