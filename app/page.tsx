@@ -4,6 +4,7 @@ import About from '@/components/About'
 import MobileCare from '@/components/MobileCare'
 import HealthRiskAssessment from '@/components/HealthRiskAssessment'
 import FunctionalHealthSummary from '@/components/FunctionalHealthSummary'
+import HowItWorks from '@/components/HowItWorks'
 import Programs from '@/components/Programs'
 import Pricing from '@/components/Pricing'
 import CorporateWellness from '@/components/CorporateWellness'
@@ -25,6 +26,7 @@ export default function Home() {
       <MobileCare />
       <HealthRiskAssessment />
       <FunctionalHealthSummary />
+      <HowItWorks />
       <Programs />
       <Pricing />
       <FXMedElite />
