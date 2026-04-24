@@ -21,7 +21,8 @@ export default function FunctionalHealthAnalysis() {
                 Advanced Health Diagnostics
               </div>
               <h1 className="font-dm-sans font-bold text-[clamp(2.5rem,5vw,4rem)] leading-[1.1] mb-6">
-                Discover Your Body's<br/>Hidden Health Patterns
+                Discover Your Body's
+                Hidden Health Patterns
               </h1>
               <p className="font-dm-sans text-[1.1rem] leading-[1.7] mb-8 text-white/90 max-w-[600px]">
                 Our functional health analysis goes beyond symptoms to identify root causes, predict health risks, and create personalized wellness strategies tailored to your unique biology.
