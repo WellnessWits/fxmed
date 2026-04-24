@@ -66,9 +66,12 @@ export default function HowItWorks() {
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
           <button className="bg-gold text-green-deep px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-gold-light hover:transform hover:translate-y-[-2px] hover:shadow-lg">
             Start Your Journey Today
+          </button>
+          <button className="bg-green-deep text-cream px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px] hover:shadow-lg">
+            Take Functional Health Assessment
           </button>
         </div>
       </div>
