@@ -79,7 +79,10 @@ export default function HowItWorks() {
           >
             Start Your Journey Today
           </button>
-          <button className="bg-cream border-2 border-green-deep text-green-deep px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-deep/10 hover:transform hover:translate-y-[-2px] hover:shadow-lg">
+          <button 
+            onClick={() => window.location.href = '/functional-health-analysis'}
+            className="bg-cream border-2 border-green-deep text-green-deep px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-deep/10 hover:transform hover:translate-y-[-2px] hover:shadow-lg"
+          >
             Take Functional Health Assessment
           </button>
         </div>
