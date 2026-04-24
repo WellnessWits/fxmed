@@ -12,6 +12,8 @@ export default function FunctionalHealthAnalysis() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-deep via-green-mid to-gold py-40 px-[5%] overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 bg-[url('/team-young-nurses-learning-practice-from-doctor-expert-cabinet.jpg')] bg-cover bg-center opacity-30"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-green-deep/80 via-green-mid/70 to-gold/60"></div>
         <div className="relative max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="text-white">
