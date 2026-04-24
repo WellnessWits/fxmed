@@ -197,50 +197,6 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<'blog' | 'crm' | 'seo' | 'health'>('blog')
   const [authChecking, setAuthChecking] = useState(true)
 
-  // Check authentication on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const session = await getSession()
-        const userIsAdmin = await isAdmin()
-        
-        if (!session || !userIsAdmin) {
-          router.push('/admin/login')
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        router.push('/admin/login')
-      } finally {
-        setAuthChecking(false)
-      }
-    }
-
-    checkAuth()
-  }, [router])
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      router.push('/admin/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-      // Still redirect even if logout fails
-      router.push('/admin/login')
-    }
-  }
-
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-deep mx-auto mb-4"></div>
-          <p className="font-dm-sans text-green-deep">Verifying authentication...</p>
-        </div>
-      </div>
-    )
-  }
-
   // CRM state
   const [patients, setPatients] = useState<Patient[]>(patientsSeed)
   const [showLeadModal, setShowLeadModal] = useState(false)
@@ -377,6 +333,50 @@ export default function AdminPanel() {
       console.error('Error creating lead:', error)
       alert('Error creating lead. Please try again.')
     }
+  }
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await getSession()
+        const userIsAdmin = await isAdmin()
+        
+        if (!session || !userIsAdmin) {
+          router.push('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.push('/admin/login')
+      } finally {
+        setAuthChecking(false)
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push('/admin/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still redirect even if logout fails
+      router.push('/admin/login')
+    }
+  }
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-deep mx-auto mb-4"></div>
+          <p className="font-dm-sans text-green-deep">Verifying authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
