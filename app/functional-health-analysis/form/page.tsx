@@ -455,7 +455,7 @@ export default function FunctionalHealthAnalysisForm() {
     <div className="min-h-screen bg-[#FCFFF0]">
       <Navigation />
       
-      <div className="max-w-4xl mx-auto px-[5%] py-12">
+      <div className="max-w-4xl mx-auto px-[5%] pt-48 pb-12">
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -504,7 +504,7 @@ export default function FunctionalHealthAnalysisForm() {
               disabled={!validateSection()}
               className="px-8 py-3 rounded-lg bg-green-deep text-white font-dm-sans font-semibold transition-all hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Analysis
+              Submit Request
             </button>
           ) : (
             <button
