@@ -29,7 +29,7 @@ export default function FunctionalHealthAnalysis() {
                   href="/functional-health-analysis/form"
                   className="inline-flex items-center justify-center px-8 py-4 bg-white text-green-deep rounded-[50px] font-dm-sans font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
                 >
-                  Take Free Analysis
+                  Request Analysis
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -218,7 +218,7 @@ export default function FunctionalHealthAnalysis() {
               href="/functional-health-analysis/form"
               className="inline-flex items-center justify-center px-8 py-4 bg-green-deep text-white rounded-[16px] font-dm-sans font-bold text-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-xl"
             >
-              Start Your Analysis Now
+              Request Analysis
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -311,7 +311,7 @@ export default function FunctionalHealthAnalysis() {
                 href="/functional-health-analysis/form"
                 className="w-full inline-flex items-center justify-center px-6 py-3 bg-gold text-green-deep rounded-[12px] font-dm-sans font-bold hover:bg-gold-light transition-all"
               >
-                Take Your Free Analysis
+                Request Analysis
               </Link>
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function FunctionalHealthAnalysis() {
               href="/functional-health-analysis/form"
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-green-deep rounded-[16px] font-dm-sans font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
             >
-              Take Free Analysis Now
+              Request Analysis
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
