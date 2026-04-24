@@ -25,9 +25,22 @@ export default function ContactModal({ isOpen, onClose }: { isOpen: boolean; onC
     setSubmitStatus('idle')
 
     try {
-      // Here you would typically send the data to your backend
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Send message to Supabase API
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
       
       setSubmitStatus('success')
       // Reset form after successful submission
@@ -39,6 +52,7 @@ export default function ContactModal({ isOpen, onClose }: { isOpen: boolean; onC
         setSubmitStatus('idle')
       }, 2000)
     } catch (error) {
+      console.error('Error sending message:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
