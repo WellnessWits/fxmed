@@ -1,4 +1,10 @@
+'use client'
+
+import { useState } from 'react'
+import BookingModal from '@/components/BookingModal'
+
 export default function HowItWorks() {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
   const steps = [
     {
       number: 1,
@@ -67,7 +73,10 @@ export default function HowItWorks() {
 
         {/* CTA */}
         <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-green-deep text-gold px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px] hover:shadow-lg">
+          <button 
+            onClick={() => setIsBookingModalOpen(true)}
+            className="bg-green-deep text-gold px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-mid hover:transform hover:translate-y-[-2px] hover:shadow-lg"
+          >
             Start Your Journey Today
           </button>
           <button className="bg-cream border-2 border-green-deep text-green-deep px-8 py-4 rounded-[50px] font-dm-sans font-bold text-lg transition-all hover:bg-green-deep/10 hover:transform hover:translate-y-[-2px] hover:shadow-lg">
@@ -75,6 +84,12 @@ export default function HowItWorks() {
           </button>
         </div>
       </div>
+
+      <BookingModal 
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        consultationType="telemedicine"
+      />
     </section>
   )
 }
