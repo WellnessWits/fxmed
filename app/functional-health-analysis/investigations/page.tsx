@@ -43,6 +43,7 @@ export default function FunctionalHealthInvestigations() {
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState<FormData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'complete' | 'bring-own'>('complete')
 
   useEffect(() => {
     // In a real app, you would fetch this data from your backend
@@ -62,48 +63,61 @@ export default function FunctionalHealthInvestigations() {
     {
       category: "Complete Blood Count (CBC)",
       description: "Comprehensive blood analysis to assess overall health, detect infections, anemia, and immune system status",
-      importance: "Essential"
+      importance: "Essential",
+      price: 6300
     },
     {
       category: "Comprehensive Metabolic Panel (CMP)",
       description: "Evaluates kidney function, liver function, blood sugar levels, and electrolyte balance for metabolic health assessment",
-      importance: "Essential"
+      importance: "Essential",
+      price: 45000
     },
     {
       category: "Lipid Profile (Total Cholesterol, LDL, HDL, Triglycerides)",
       description: "Complete cholesterol analysis including HDL, LDL, and triglycerides to assess cardiovascular risk and metabolic function",
-      importance: "Essential"
+      importance: "Essential",
+      price: 20500
     },
     {
       category: "Thyroid (TSH, free T3, free T4)",
       description: "Comprehensive thyroid evaluation to assess metabolic rate, energy production, and hormonal balance",
-      importance: "Essential"
+      importance: "Essential",
+      price: 35000
     },
     {
       category: "HbA1c (Glycated Hemoglobin)",
       description: "Measures average blood sugar levels over 2-3 months to assess glucose control and metabolic health",
-      importance: "Essential"
+      importance: "Essential",
+      price: 25000
     },
     {
       category: "High Sensitivity CRP",
       description: "Detects low levels of inflammation that may indicate chronic disease risk and cardiovascular issues",
-      importance: "Essential"
+      importance: "Essential",
+      price: 21000
     },
     {
       category: "Vitamin D (25-OH Vitamin D)",
       description: "Measures vitamin D status critical for immune function, bone health, hormone balance, and disease prevention",
-      importance: "Essential"
+      importance: "Essential",
+      price: 80000
     },
     {
       category: "ESR (Erythrocyte Sedimentation Rate)",
       description: "Measures the rate at which red blood cells settle in a test tube, indicating inflammation levels in the body",
-      importance: "Essential"
+      importance: "Essential",
+      price: 6000
     },
   ]
 
   const essentialTests = investigations
 
-  
+  // Calculate total price for Complete Health Package
+  const labTestsTotal = investigations.reduce((sum, test) => sum + (test.price || 0), 0)
+  const functionalAnalysisPrice = 235000
+  const logisticsFee = 20000
+  const totalPrice = labTestsTotal + functionalAnalysisPrice + logisticsFee
+
   const handlePayment = () => {
     // Redirect to payment page or payment gateway
     const paymentUrl = "https://paystack.shop/pay/fxmed"
@@ -135,11 +149,83 @@ export default function FunctionalHealthInvestigations() {
             Required Investigations for Analysis
           </h1>
           <p className="font-dm-sans text-text-mid text-[1.1rem] leading-[1.7] max-w-3xl mx-auto">
-            The following laboratory tests that will provide deep insights into your health status and help us create your personalized wellness plan.
+            Please complete the following lab tests to provide deep insights into your health status and help us create your personalized wellness plan.
             <br /><br />
             As we proceed, you may be required to do some more investigations depending on the results of these.
           </p>
         </div>
+
+        {/* Tabs */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-white rounded-[50px] p-1 shadow-sm">
+            <button 
+              onClick={() => setActiveTab('complete')}
+              className={`font-dm-sans px-6 py-3 rounded-[50px] text-[1rem] font-medium transition-all ${
+                activeTab === 'complete' 
+                  ? 'bg-gold text-green-deep' 
+                  : 'text-green-deep hover:bg-green-deep/10'
+              }`}
+            >
+              Complete Health Package
+            </button>
+            <button 
+              onClick={() => setActiveTab('bring-own')}
+              className={`font-dm-sans px-6 py-3 rounded-[50px] text-[1rem] font-medium transition-all ${
+                activeTab === 'bring-own' 
+                  ? 'bg-gold text-green-deep' 
+                  : 'text-green-deep hover:bg-green-deep/10'
+              }`}
+            >
+              Bring My Own Results
+            </button>
+          </div>
+        </div>
+
+        {/* Price Display for Complete Health Package */}
+        {activeTab === 'complete' && (
+          <div className="bg-gradient-to-br from-green-deep to-green-mid rounded-[24px] p-8 text-white mb-8">
+            <div className="text-center">
+              <h2 className="font-dm-sans font-bold text-2xl mb-4">Complete Health Package</h2>
+              <p className="font-dm-sans text-white/90 text-[1.1rem] mb-6">
+                All recommended tests for comprehensive health analysis
+              </p>
+              
+              <div className="bg-white/10 backdrop-blur rounded-lg p-6 mb-6">
+                <div className="text-center">
+                  <span className="font-dm-sans text-xl text-white/90">Complete Functional Health Analysis Package</span>
+                  <div className="font-dm-sans font-bold text-3xl mt-2">NGN {totalPrice.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <p className="font-dm-sans text-white/80 text-sm">
+                Includes all 8 essential laboratory investigations ({labTestsTotal.toLocaleString()} NGN) + Functional Health Analysis ({functionalAnalysisPrice.toLocaleString()} NGN) + Logistics Fee ({logisticsFee.toLocaleString()} NGN)
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Price Display for Bring My Own Results */}
+        {activeTab === 'bring-own' && (
+          <div className="bg-gradient-to-br from-green-deep to-green-mid rounded-[24px] p-8 text-white mb-8">
+            <div className="text-center">
+              <h2 className="font-dm-sans font-bold text-2xl mb-4">Bring Your Own Results</h2>
+              <p className="font-dm-sans text-white/90 text-[1.1rem] mb-6">
+                Functional health analysis of your existing lab results
+              </p>
+              
+              <div className="bg-white/10 backdrop-blur rounded-lg p-6 mb-6">
+                <div className="text-center">
+                  <span className="font-dm-sans text-xl text-white/90">Functional Health Analysis Only</span>
+                  <div className="font-dm-sans font-bold text-3xl mt-2">NGN {functionalAnalysisPrice.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <p className="font-dm-sans text-white/80 text-sm">
+                Analysis and interpretation of your existing laboratory test results
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Patient Information */}
         {formData && (
@@ -175,23 +261,33 @@ export default function FunctionalHealthInvestigations() {
           <div className="space-y-4">
             {essentialTests.map((test, index) => (
               <div key={index} className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4">
-                <div>
-                  <h3 className="font-dm-sans font-semibold text-green-deep text-lg mb-2">{test.category}</h3>
-                  <p className="font-dm-sans text-text-mid text-sm leading-[1.6]">{test.description}</p>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="font-dm-sans font-semibold text-green-deep text-lg mb-2">{test.category}</h3>
+                    <p className="font-dm-sans text-text-mid text-sm leading-[1.6]">{test.description}</p>
+                  </div>
+                  {test.price && activeTab === 'complete' && (
+                    <div className="ml-4 text-right">
+                      <span className="font-dm-sans font-bold text-green-deep text-lg">
+                        ₦{test.price.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Download Investigation Form */}
-        <div className="bg-white rounded-[24px] p-8 shadow-lg mb-8 text-center">
-          <h3 className="font-dm-sans font-semibold text-green-deep text-lg mb-4">
-            Need to take these tests to a lab?
-          </h3>
-          <p className="font-dm-sans text-text-mid text-sm mb-6 max-w-lg mx-auto">
-            Download the investigation form to present at your preferred laboratory or bring to your FXMed appointment.
-          </p>
+        {/* Download Investigation Form - Only for Bring My Own Results */}
+        {activeTab === 'bring-own' && (
+          <div className="bg-white rounded-[24px] p-8 shadow-lg mb-8 text-center">
+            <h3 className="font-dm-sans font-semibold text-green-deep text-lg mb-4">
+              Need to take these tests to a lab?
+            </h3>
+            <p className="font-dm-sans text-text-mid text-sm mb-6 max-w-lg mx-auto">
+              Download the investigation form to present at your preferred laboratory or bring to your FXMed appointment.
+            </p>
           <button
             onClick={() => {
               // Create styled HTML content for PDF
@@ -507,6 +603,7 @@ export default function FunctionalHealthInvestigations() {
             Download Investigation Form
           </button>
         </div>
+        )}
 
         {/* Summary and Payment */}
         <div className="bg-gradient-to-br from-green-deep to-green-mid rounded-[24px] p-8 text-white">
