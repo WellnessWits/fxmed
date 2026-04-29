@@ -116,6 +116,9 @@ export default function FunctionalHealthAnalysisForm() {
   const prevSection = () => {
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1)
+    } else {
+      // Navigate back to previous page when on first section
+      window.history.back()
     }
   }
 
@@ -308,47 +311,181 @@ export default function FunctionalHealthAnalysisForm() {
       case 'lifestyle':
         return (
           <div className="space-y-6">
+            {/* Dietary Habits */}
             <div>
-              <label className="block font-dm-sans font-medium text-green-deep mb-2">Dietary Habits *</label>
+              <label className="block font-dm-sans font-medium text-green-deep mb-3">Dietary Habits *</label>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  'Regular meals (3x daily)',
+                  'Irregular eating patterns',
+                  'High processed foods',
+                  'Mostly whole foods',
+                  'Vegetarian/Vegan',
+                  'Low carb diet',
+                  'High protein diet',
+                  'Frequent snacking',
+                  'Gluten-free',
+                  'Dairy-free',
+                  'Organic foods',
+                  'Takeout/Restaurant meals'
+                ].map((habit) => (
+                  <label key={habit} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                      onChange={(e) => {
+                        const currentDiet = formData.lifestyle.diet.split(', ').filter(s => s.trim())
+                        if (e.target.checked) {
+                          currentDiet.push(habit)
+                        } else {
+                          const index = currentDiet.indexOf(habit)
+                          if (index > -1) currentDiet.splice(index, 1)
+                        }
+                        handleInputChange('lifestyle', 'diet', currentDiet.filter(s => s.trim()).join(', '))
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{habit}</span>
+                  </label>
+                ))}
+              </div>
               <textarea
                 value={formData.lifestyle.diet}
                 onChange={(e) => handleInputChange('lifestyle', 'diet', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your typical diet, eating patterns, any restrictions..."
+                rows={2}
+                placeholder="Additional dietary details..."
               />
             </div>
 
+            {/* Exercise Routine */}
             <div>
-              <label className="block font-dm-sans font-medium text-green-deep mb-2">Exercise Routine *</label>
+              <label className="block font-dm-sans font-medium text-green-deep mb-3">Exercise Routine *</label>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  'Daily exercise',
+                  '3-4 times per week',
+                  '1-2 times per week',
+                  'Rarely/Never exercise',
+                  'Cardio workouts',
+                  'Strength training',
+                  'Walking/Jogging',
+                  'Sports activities',
+                  'Home workouts',
+                  'No regular routine'
+                ].map((routine) => (
+                  <label key={routine} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                      onChange={(e) => {
+                        const currentExercise = formData.lifestyle.exercise.split(', ').filter(s => s.trim())
+                        if (e.target.checked) {
+                          currentExercise.push(routine)
+                        } else {
+                          const index = currentExercise.indexOf(routine)
+                          if (index > -1) currentExercise.splice(index, 1)
+                        }
+                        handleInputChange('lifestyle', 'exercise', currentExercise.filter(s => s.trim()).join(', '))
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{routine}</span>
+                  </label>
+                ))}
+              </div>
               <textarea
                 value={formData.lifestyle.exercise}
                 onChange={(e) => handleInputChange('lifestyle', 'exercise', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your physical activity, exercise frequency, type of workouts..."
+                rows={2}
+                placeholder="Additional exercise details..."
               />
             </div>
 
+            {/* Sleep Patterns */}
             <div>
-              <label className="block font-dm-sans font-medium text-green-deep mb-2">Sleep Patterns *</label>
+              <label className="block font-dm-sans font-medium text-green-deep mb-3">Sleep Patterns *</label>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  '7-8 hours nightly',
+                  'Less than 6 hours',
+                  'More than 9 hours',
+                  'Irregular sleep schedule',
+                  'Difficulty falling asleep',
+                  'Frequent night waking',
+                  'Early morning awakening',
+                  'Good sleep quality',
+                  'Poor sleep quality',
+                  'Use sleep aids',
+                  'No screen time before bed',
+                  'Regular bedtime routine'
+                ].map((pattern) => (
+                  <label key={pattern} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                      onChange={(e) => {
+                        const currentSleep = formData.lifestyle.sleep.split(', ').filter(s => s.trim())
+                        if (e.target.checked) {
+                          currentSleep.push(pattern)
+                        } else {
+                          const index = currentSleep.indexOf(pattern)
+                          if (index > -1) currentSleep.splice(index, 1)
+                        }
+                        handleInputChange('lifestyle', 'sleep', currentSleep.filter(s => s.trim()).join(', '))
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{pattern}</span>
+                  </label>
+                ))}
+              </div>
               <textarea
                 value={formData.lifestyle.sleep}
                 onChange={(e) => handleInputChange('lifestyle', 'sleep', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your sleep quality, duration, any sleep issues..."
+                rows={2}
+                placeholder="Additional sleep details..."
               />
             </div>
 
+            {/* Stress Levels */}
             <div>
-              <label className="block font-dm-sans font-medium text-green-deep mb-2">Stress Levels *</label>
+              <label className="block font-dm-sans font-medium text-green-deep mb-3">Stress Levels *</label>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  'High stress levels',
+                  'Moderate stress',
+                  'Low stress',
+                  'Work-related stress',
+                  'Financial stress',
+                  'Family stress',
+                  'Health-related stress',
+                  'Good stress management'
+                ].map((level) => (
+                  <label key={level} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                      onChange={(e) => {
+                        const currentStress = formData.lifestyle.stress.split(', ').filter(s => s.trim())
+                        if (e.target.checked) {
+                          currentStress.push(level)
+                        } else {
+                          const index = currentStress.indexOf(level)
+                          if (index > -1) currentStress.splice(index, 1)
+                        }
+                        handleInputChange('lifestyle', 'stress', currentStress.filter(s => s.trim()).join(', '))
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{level}</span>
+                  </label>
+                ))}
+              </div>
               <textarea
                 value={formData.lifestyle.stress}
                 onChange={(e) => handleInputChange('lifestyle', 'stress', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="Describe your stress levels, sources of stress, coping mechanisms..."
+                rows={2}
+                placeholder="Additional stress details..."
               />
             </div>
           </div>
@@ -407,13 +544,47 @@ export default function FunctionalHealthAnalysisForm() {
         return (
           <div className="space-y-6">
             <div>
-              <label className="block font-dm-sans font-medium text-green-deep mb-2">Primary Health Goal *</label>
+              <label className="block font-dm-sans font-medium text-green-deep mb-3">Primary Health Goal *</label>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                {[
+                  'Improve energy levels',
+                  'Lose weight',
+                  'Gain muscle/mass',
+                  'Better sleep quality',
+                  'Reduce stress/anxiety',
+                  'Improve digestion',
+                  'Hormonal balance',
+                  'Better skin health',
+                  'Pain management',
+                  'Boost immune system',
+                  'Improve mental clarity',
+                  'Manage chronic condition'
+                ].map((goal) => (
+                  <label key={goal} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                      onChange={(e) => {
+                        const currentGoals = formData.goals.primaryGoal.split(', ').filter(s => s.trim())
+                        if (e.target.checked) {
+                          currentGoals.push(goal)
+                        } else {
+                          const index = currentGoals.indexOf(goal)
+                          if (index > -1) currentGoals.splice(index, 1)
+                        }
+                        handleInputChange('goals', 'primaryGoal', currentGoals.filter(s => s.trim()).join(', '))
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{goal}</span>
+                  </label>
+                ))}
+              </div>
               <textarea
                 value={formData.goals.primaryGoal}
                 onChange={(e) => handleInputChange('goals', 'primaryGoal', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-green-deep/20 focus:outline-none focus:border-gold"
-                rows={3}
-                placeholder="What is your main health goal you want to achieve?"
+                rows={2}
+                placeholder="Other health goals or additional details..."
               />
             </div>
 
@@ -492,10 +663,9 @@ export default function FunctionalHealthAnalysisForm() {
         <div className="flex justify-between">
           <button
             onClick={prevSection}
-            disabled={currentSection === 0}
-            className="px-6 py-3 rounded-lg border border-green-deep/20 font-dm-sans font-medium transition-all hover:border-green-deep/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-lg border border-green-deep/20 font-dm-sans font-medium transition-all hover:border-green-deep/40"
           >
-            ← Previous
+            Previous
           </button>
 
           {currentSection === sections.length - 1 ? (

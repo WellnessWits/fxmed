@@ -70,12 +70,12 @@ export default function FunctionalHealthInvestigations() {
       importance: "Essential"
     },
     {
-      category: "Lipid Profile",
+      category: "Lipid Profile (Total Cholesterol, LDL, HDL, Triglycerides)",
       description: "Complete cholesterol analysis including HDL, LDL, and triglycerides to assess cardiovascular risk and metabolic function",
       importance: "Essential"
     },
     {
-      category: "Thyroid Function Panel (TSH, T3, T4)",
+      category: "Thyroid (TSH, free T3, free T4)",
       description: "Comprehensive thyroid evaluation to assess metabolic rate, energy production, and hormonal balance",
       importance: "Essential"
     },
@@ -90,15 +90,15 @@ export default function FunctionalHealthInvestigations() {
       importance: "Essential"
     },
     {
-      category: "Vitamin D Panel (25-OH Vitamin D)",
+      category: "Vitamin D (25-OH Vitamin D)",
       description: "Measures vitamin D status critical for immune function, bone health, hormone balance, and disease prevention",
       importance: "Essential"
     },
     {
-      category: "Ferritin & Iron Panel",
-      description: "Complete iron status assessment including ferritin, serum iron, and TIBC to evaluate energy metabolism and oxygen transport",
+      category: "ESR (Erythrocyte Sedimentation Rate)",
+      description: "Measures the rate at which red blood cells settle in a test tube, indicating inflammation levels in the body",
       importance: "Essential"
-    }
+    },
   ]
 
   const essentialTests = investigations
@@ -447,11 +447,11 @@ export default function FunctionalHealthInvestigations() {
                             <div class="test-description">Evaluates kidney function, liver function, blood sugar levels, and electrolyte balance for metabolic health assessment</div>
                           </li>
                           <li class="test-item">
-                            <div class="test-name">3. Lipid Profile</div>
+                            <div class="test-name">3. Lipid Profile (Total Cholesterol, LDL, HDL, Triglycerides)</div>
                             <div class="test-description">Complete cholesterol analysis including HDL, LDL, and triglycerides to assess cardiovascular risk and metabolic function</div>
                           </li>
                           <li class="test-item">
-                            <div class="test-name">4. Thyroid Function Panel (TSH, T3, T4)</div>
+                            <div class="test-name">4. Thyroid (TSH, free T3, free T4)</div>
                             <div class="test-description">Comprehensive thyroid evaluation to assess metabolic rate, energy production, and hormonal balance</div>
                           </li>
                           <li class="test-item">
@@ -463,12 +463,12 @@ export default function FunctionalHealthInvestigations() {
                             <div class="test-description">Detects low levels of inflammation that may indicate chronic disease risk and cardiovascular issues</div>
                           </li>
                           <li class="test-item">
-                            <div class="test-name">7. Vitamin D Panel (25-OH Vitamin D)</div>
+                            <div class="test-name">7. Vitamin D (25-OH Vitamin D)</div>
                             <div class="test-description">Measures vitamin D status critical for immune function, bone health, hormone balance, and disease prevention</div>
                           </li>
                           <li class="test-item">
-                            <div class="test-name">8. Ferritin & Iron Panel</div>
-                            <div class="test-description">Complete iron status assessment including ferritin, serum iron, and TIBC to evaluate energy metabolism and oxygen transport</div>
+                            <div class="test-name">8. ESR (Erythrocyte Sedimentation Rate)</div>
+                            <div class="test-description">Measures the rate at which red blood cells settle in a test tube, indicating inflammation levels in the body</div>
                           </li>
                         </ul>
                       </div>

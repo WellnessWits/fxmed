@@ -46,6 +46,9 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+    } else {
+      // Close modal and redirect to home when on step 1
+      onClose()
     }
   }
 
@@ -145,7 +148,7 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl font-light"
+              className="text-gray-400 hover:text-gray-600 text-3xl font-light p-2 -mr-2 -mt-2"
             >
               ×
             </button>
@@ -320,15 +323,60 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
               </h3>
               
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Select your symptoms (check all that apply):
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  {[
+                    'Fatigue/Low Energy',
+                    'Digestive Issues',
+                    'Hormonal Imbalance',
+                    'Thyroid Issues',
+                    'Weight Management',
+                    'Sleep Problems',
+                    'Stress/Anxiety',
+                    'Brain Fog',
+                    'Hair Loss',
+                    'Skin Issues',
+                    'Joint Pain',
+                    'Headaches/Migraines',
+                    'Other'
+                  ].map((symptom) => (
+                    <label key={symptom} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-green-mid border-gray-300 rounded focus:ring-green-mid"
+                        onChange={(e) => {
+                          const currentSymptoms = bookingData.symptoms.split(', ').filter(s => s.trim())
+                          if (e.target.checked) {
+                            if (symptom === 'Other') {
+                              currentSymptoms.push('Other: ')
+                            } else {
+                              currentSymptoms.push(symptom)
+                            }
+                          } else {
+                            const index = currentSymptoms.findIndex(s => s === symptom || s.startsWith('Other:'))
+                            if (index > -1) currentSymptoms.splice(index, 1)
+                          }
+                          updateBookingData('symptoms', currentSymptoms.filter(s => s.trim()).join(', '))
+                        }}
+                      />
+                      <span className="text-sm text-gray-700">{symptom}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Please describe your symptoms or health concerns *
+                  Additional details or description *
                 </label>
                 <textarea
                   value={bookingData.symptoms}
                   onChange={(e) => updateBookingData('symptoms', e.target.value)}
-                  rows={6}
+                  rows={3}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-mid focus:border-transparent"
-                  placeholder="Please describe your symptoms, how long you've been experiencing them, and any treatments you've tried..."
+                  placeholder="Please provide more details about your symptoms, duration, and any treatments you've tried..."
                 />
               </div>
               
@@ -395,8 +443,7 @@ export default function BookingModal({ isOpen, onClose, consultationType }: Book
           <div className="flex justify-between">
             <button
               onClick={handleBack}
-              disabled={currentStep === 1}
-              className="px-6 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
             >
               Back
             </button>
